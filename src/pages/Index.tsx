@@ -130,7 +130,7 @@ const Index = () => {
             />
             <PricingCard
               title="PRO"
-              price="Rp 180.000"
+              price="Rp 60.000"
               period="/3 bulan"
               features={['Prompt tanpa batas', 'Voice chat', 'Upload semua jenis file', 'Prioritas respon']}
               isPopular={true}
