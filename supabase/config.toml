@@ -1,0 +1,19 @@
+project_id = "tbmxpzcjypaktqbeispu"
+
+[functions.chat-with-ainya]
+verify_jwt = true
+
+[functions.send-otp]
+verify_jwt = false
+
+[functions.verify-otp]
+verify_jwt = false
+
+[api]
+port = 8000
+
+[db]
+port = 5433
+
+[studio]
+port = 8001
