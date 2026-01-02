@@ -115,8 +115,8 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
   };
 
   return (
-    <ScrollArea className="flex-1 p-2 h-full bg-[#020617]">
-      <div className="flex flex-col pb-2">
+    <ScrollArea className="flex-1 p-1 h-full bg-red-900">
+      <div className="flex flex-col pb-1 bg-green-900">
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
           const isEditing = editingId === msg.id;
