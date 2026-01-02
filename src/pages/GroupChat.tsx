@@ -26,6 +26,9 @@ const GroupChat = () => {
   const [editValue, setEditValue] = useState('');
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
 
+  // State Reply
+  const [replyingTo, setReplyingTo] = useState<any | null>(null);
+
   // State Edit Nama Grup
   const [isEditingName, setIsEditingName] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -59,9 +62,50 @@ const GroupChat = () => {
     return <div className="text-sm whitespace-pre-wrap">{msg.content}</div>;
   };
 
-  const fetchMessages = async () => { /* ...Sama seperti sebelumnya... */
+  // Fungsi untuk render replied message preview
+  const renderReplyPreview = (replyToMessage: any) => {
+    if (!replyToMessage) return null;
+    
+    const senderName = replyToMessage.profiles?.display_name || 
+                      replyToMessage.profiles?.email?.split('@')[0] || 
+                      'Unknown User';
+    
+    return (
+      <div className="mb-2 p-2 bg-black/20 border-l-2 border-cyan-400 rounded text-xs">
+        <div className="text-cyan-400 font-medium mb-1">↳ Membalas {senderName}</div>
+        <div className="text-white/70 line-clamp-2">
+          {replyToMessage.content.length > 100 
+            ? replyToMessage.content.substring(0, 100) + '...'
+            : replyToMessage.content
+          }
+        </div>
+      </div>
+    );
+  };
+
+  const fetchMessages = async () => {
     if (!groupId) return;
-    const { data, error } = await supabase.from('group_messages').select('*').eq('group_id', groupId).order('created_at', { ascending: true });
+    const { data, error } = await supabase
+      .from('group_messages')
+      .select(`
+        *,
+        reply_to_message:reply_to (
+          id,
+          content,
+          user_id,
+          profiles!group_messages_user_id_fkey (
+            display_name,
+            email
+          )
+        ),
+        profiles!group_messages_user_id_fkey (
+          display_name,
+          email
+        )
+      `)
+      .eq('group_id', groupId)
+      .order('created_at', { ascending: true });
+    
     if (!error && data) setMessages(data);
   };
 
@@ -121,11 +165,22 @@ const GroupChat = () => {
     if (!error) { setEditingId(null); toast.success("Pesan diperbarui"); }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => { /* ...Sama... */
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !profile || !groupId) return;
-    const content = newMessage; setNewMessage('');
-    await supabase.from('group_messages').insert({ group_id: groupId, user_id: profile.id, content });
+    
+    const content = newMessage;
+    const replyToId = replyingTo?.id || null;
+    
+    setNewMessage('');
+    setReplyingTo(null); // Clear reply state
+    
+    await supabase.from('group_messages').insert({ 
+      group_id: groupId, 
+      user_id: profile.id, 
+      content,
+      reply_to: replyToId
+    });
   };
 
   if (loading) return <div className="flex items-center justify-center h-screen bg-black"><Loader2 className="w-8 h-8 animate-spin text-cyan-500" /></div>;
@@ -186,6 +241,10 @@ const GroupChat = () => {
                          onClick={(e) => { e.stopPropagation(); isMe && setSelectedMessageId(selectedMessageId === msg.id ? null : msg.id); }}
                          className={`px-4 py-3 text-sm transition-all active:scale-95 ${isMe ? 'bg-cyan-500 text-black rounded-2xl rounded-br-none' : 'bg-zinc-800 text-white rounded-2xl rounded-bl-none'}`}
                        >
+                         {/* Render replied message preview */}
+                         {msg.reply_to_message && renderReplyPreview(msg.reply_to_message)}
+                         
+                         {/* Render message content */}
                          {renderMessageContent(msg)}
                        </div>
                        
@@ -199,6 +258,21 @@ const GroupChat = () => {
                            </Button>
                          </div>
                        )}
+
+                       {/* Reply button - show on hover for all messages */}
+                       <button
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           setReplyingTo(msg);
+                           setSelectedMessageId(null);
+                         }}
+                         className="absolute -right-8 top-2 p-1.5 text-slate-500 hover:text-cyan-400 opacity-0 group-hover:opacity-100 transition-all transform hover:scale-110 bg-[#020617]/80 rounded-full"
+                         title="Balas pesan"
+                       >
+                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                         </svg>
+                       </button>
                      </>
                    )}
                  </div>
@@ -211,9 +285,42 @@ const GroupChat = () => {
 
       {/* INPUT */}
       <div className="p-4 bg-[#020617] border-t border-white/10">
+        {/* Reply Preview */}
+        {replyingTo && (
+          <div className="mb-3 p-3 bg-zinc-900 border border-cyan-500/30 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-cyan-400 text-sm font-medium flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+                Membalas {replyingTo.profiles?.display_name || replyingTo.profiles?.email?.split('@')[0] || 'Unknown User'}
+              </div>
+              <button
+                onClick={() => setReplyingTo(null)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="text-white/70 text-sm line-clamp-2">
+              {replyingTo.content.length > 150 
+                ? replyingTo.content.substring(0, 150) + '...'
+                : replyingTo.content
+              }
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSendMessage} className="flex gap-2">
-          <Input placeholder="Ketik pesan..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} className="bg-zinc-900 border-white/5 text-white h-12 rounded-xl" />
-          <Button type="submit" size="icon" className="bg-cyan-500 text-black h-12 w-12 rounded-xl shrink-0"><Send /></Button>
+          <Input 
+            placeholder={replyingTo ? "Tulis balasan..." : "Ketik pesan..."} 
+            value={newMessage} 
+            onChange={(e) => setNewMessage(e.target.value)} 
+            className="bg-zinc-900 border-white/5 text-white h-12 rounded-xl" 
+          />
+          <Button type="submit" size="icon" className="bg-cyan-500 text-black h-12 w-12 rounded-xl shrink-0">
+            <Send />
+          </Button>
         </form>
       </div>
     </div>,
