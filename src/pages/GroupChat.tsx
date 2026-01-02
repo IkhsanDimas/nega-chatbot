@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Send, Loader2, Users, User, Trash2, Edit2, X, Check, Pencil } from 'lucide-react';
 import { GroupInfoDialog } from '@/components/GroupInfoDialog';
+import { SharedChatPreview } from '@/components/chat/SharedChatPreview';
 import { toast } from 'sonner';
 
 const GroupChat = () => {
@@ -30,6 +31,33 @@ const GroupChat = () => {
   const [newGroupName, setNewGroupName] = useState('');
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Fungsi untuk mendeteksi shared chat link
+  const detectSharedChatLink = (content: string) => {
+    const regex = /https?:\/\/[^\s]+\/shared\/[a-f0-9-]+/gi;
+    return content.match(regex)?.[0] || null;
+  };
+
+  // Fungsi untuk render konten pesan
+  const renderMessageContent = (msg: any) => {
+    const sharedLink = detectSharedChatLink(msg.content);
+    
+    if (sharedLink) {
+      // Jika ada shared chat link, tampilkan preview
+      const textWithoutLink = msg.content.replace(sharedLink, '').trim();
+      return (
+        <div className="space-y-3">
+          {textWithoutLink && (
+            <div className="text-sm whitespace-pre-wrap">{textWithoutLink}</div>
+          )}
+          <SharedChatPreview shareLink={sharedLink} />
+        </div>
+      );
+    }
+    
+    // Jika tidak ada shared link, tampilkan text biasa
+    return <div className="text-sm whitespace-pre-wrap">{msg.content}</div>;
+  };
 
   const fetchMessages = async () => { /* ...Sama seperti sebelumnya... */
     if (!groupId) return;
@@ -158,7 +186,7 @@ const GroupChat = () => {
                          onClick={(e) => { e.stopPropagation(); isMe && setSelectedMessageId(selectedMessageId === msg.id ? null : msg.id); }}
                          className={`px-4 py-3 text-sm transition-all active:scale-95 ${isMe ? 'bg-cyan-500 text-black rounded-2xl rounded-br-none' : 'bg-zinc-800 text-white rounded-2xl rounded-bl-none'}`}
                        >
-                         {msg.content}
+                         {renderMessageContent(msg)}
                        </div>
                        
                        {selectedMessageId === msg.id && isMe && (

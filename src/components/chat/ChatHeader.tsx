@@ -19,6 +19,7 @@ interface ChatHeaderProps {
   remainingPrompts: number;
   isPro: boolean;
   messages?: Message[];
+  conversationId?: string;
 }
 
 const ChatHeader = ({
@@ -28,6 +29,7 @@ const ChatHeader = ({
   remainingPrompts,
   isPro,
   messages = [],
+  conversationId,
 }: ChatHeaderProps) => {
   const navigate = useNavigate();
 
@@ -55,10 +57,11 @@ const ChatHeader = ({
 
       <div className="flex items-center gap-4">
         {/* Share to Group Button */}
-        {messages.length > 0 && (
+        {messages.length > 0 && conversationId && (
           <ShareToGroupDialog 
             messages={messages} 
             conversationTitle={conversationTitle}
+            conversationId={conversationId}
           />
         )}
 

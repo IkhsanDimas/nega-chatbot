@@ -24,9 +24,10 @@ interface Group {
 interface ShareToGroupDialogProps {
   messages: Message[];
   conversationTitle?: string;
+  conversationId?: string;
 }
 
-export function ShareToGroupDialog({ messages, conversationTitle }: ShareToGroupDialogProps) {
+export function ShareToGroupDialog({ messages, conversationTitle, conversationId }: ShareToGroupDialogProps) {
   const [open, setOpen] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
@@ -115,12 +116,42 @@ export function ShareToGroupDialog({ messages, conversationTitle }: ShareToGroup
 
     setIsSharing(true);
     try {
-      const formattedChat = formatChatForSharing();
+      // 1. Buat shared link dari conversation
+      if (!conversationId) {
+        toast.error('Tidak ada percakapan untuk dibagikan');
+        return;
+      }
+
+      // 2. Update conversation menjadi shared
+      const { error: updateError } = await supabase
+        .from('conversations')
+        .update({ 
+          is_shared: true,
+          share_link: `${window.location.origin}/shared/${conversationId}`
+        })
+        .eq('id', conversationId);
+
+      if (updateError) throw updateError;
+
+      // 3. Format pesan untuk grup dengan link interaktif
+      const title = conversationTitle || 'Chat dengan AI';
+      const timestamp = new Date().toLocaleString('id-ID');
+      const shareLink = `${window.location.origin}/shared/${conversationId}`;
+      
+      const shareMessage = `🤖 **${title}**\n\n` +
+        `💬 Percakapan dengan AI telah dibagikan!\n` +
+        `🕒 ${timestamp}\n\n` +
+        `👀 **Klik link di bawah untuk melihat percakapan lengkap:**\n` +
+        `🔗 ${shareLink}\n\n` +
+        `✨ Anda bisa melihat seluruh chat history dan diskusi bersama!\n` +
+        `💡 Ingin chat dengan AI juga? Daftar gratis di Nega Chatbot!`;
+
+      // 4. Kirim ke semua grup yang dipilih
       const sharePromises = Array.from(selectedGroups).map(groupId =>
         supabase.from('group_messages').insert({
           group_id: groupId,
           user_id: user?.id,
-          content: formattedChat,
+          content: shareMessage,
           role: 'user'
         })
       );
@@ -165,7 +196,7 @@ export function ShareToGroupDialog({ messages, conversationTitle }: ShareToGroup
         
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Pilih grup untuk membagikan percakapan ini dengan AI
+            Bagikan link percakapan ini ke grup. Member grup bisa melihat seluruh chat history dan berdiskusi bersama!
           </p>
 
           {isLoading ? (
