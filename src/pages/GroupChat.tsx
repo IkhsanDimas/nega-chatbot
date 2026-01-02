@@ -5,10 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Send, Loader2, Trash2, Edit2, X, Check, Pencil, Smile } from 'lucide-react';
+import { ArrowLeft, Send, Loader2, Trash2, Edit2, X, Check, Pencil, Smile, Users } from 'lucide-react';
 import { GroupInfoDialog } from '@/components/GroupInfoDialog';
 import { SharedChatPreview } from '@/components/chat/SharedChatPreview';
 import EmojiPicker from '@/components/chat/EmojiPicker';
+import GroupMembersDialog from '@/components/GroupMembersDialog';
 import { toast } from 'sonner';
 
 const GroupChat = () => {
@@ -32,6 +33,9 @@ const GroupChat = () => {
 
   // State Emoji & Sticker
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  // State Members Dialog
+  const [showMembersDialog, setShowMembersDialog] = useState(false);
 
   // State Edit Nama Grup
   const [isEditingName, setIsEditingName] = useState(false);
@@ -335,8 +339,19 @@ const GroupChat = () => {
           )}
         </div>
         
-        {/* Tombol Share di Kanan */}
-        <GroupInfoDialog groupId={groupId!} groupName={groupName} inviteCode={inviteCode} />
+        {/* Tombol Members dan Share di Kanan */}
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => setShowMembersDialog(true)}
+            variant="ghost" 
+            size="sm" 
+            className="text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+          >
+            <Users className="w-4 h-4 mr-2" />
+            Members
+          </Button>
+          <GroupInfoDialog groupId={groupId!} groupName={groupName} inviteCode={inviteCode} />
+        </div>
       </div>
 
       {/* BODY CHAT */}
@@ -470,6 +485,14 @@ const GroupChat = () => {
           </Button>
         </form>
       </div>
+
+      {/* Group Members Dialog */}
+      <GroupMembersDialog
+        groupId={groupId!}
+        groupName={groupName}
+        isOpen={showMembersDialog}
+        onClose={() => setShowMembersDialog(false)}
+      />
     </div>,
     document.body
   );
