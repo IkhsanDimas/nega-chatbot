@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Share2, Copy, Check, MessageCircle, MoreHorizontal } from 'lucide-react';
+import { Share2, Copy, Check, MessageCircle, MoreHorizontal, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function GroupInfoDialog({ groupId, groupName, inviteCode }: { groupId: string, groupName: string, inviteCode?: string }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
 
   const link = inviteCode ? `${window.location.origin}/join/${inviteCode}` : '';
   const shareText = `Halo! Bergabunglah dengan grup "${groupName}" di Nega Chatbot: ${link}`;
@@ -91,64 +91,81 @@ export function GroupInfoDialog({ groupId, groupName, inviteCode }: { groupId: s
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-cyan-400 hover:bg-cyan-500/10 gap-2 font-bold text-[10px]">
-          <Share2 className="w-4 h-4" /> BAGIKAN
-        </Button>
-      </DialogTrigger>
-      
-      <DialogContent className="bg-white text-slate-900 sm:max-w-[320px] rounded-3xl p-6 border-none shadow-2xl">
-        <DialogHeader className="mb-4">
-          <DialogTitle className="text-center text-slate-800 text-lg font-bold">Bagikan Grup</DialogTitle>
-        </DialogHeader>
-        
-        {!inviteCode ? (
-          <div className="text-center py-8">
-            <p className="text-slate-600 text-sm">Kode undangan tidak tersedia. Silakan coba lagi nanti.</p>
+    <>
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="text-cyan-400 hover:bg-cyan-500/10 gap-2 font-bold text-[10px]"
+        onClick={() => {
+          console.log('BAGIKAN button clicked');
+          console.log('Current inviteCode:', inviteCode);
+          console.log('Current link:', link);
+          setOpen(true);
+        }}
+      >
+        <Share2 className="w-4 h-4" /> BAGIKAN
+      </Button>
+
+      {/* Custom Modal Overlay */}
+      {open && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50" onClick={() => setOpen(false)}>
+          <div className="bg-white text-slate-900 max-w-[320px] w-full mx-4 rounded-3xl p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-center text-slate-800 text-lg font-bold flex-1">Bagikan Grup</h2>
+              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {!inviteCode ? (
+              <div className="text-center py-8">
+                <p className="text-slate-600 text-sm">Kode undangan tidak tersedia. Silakan coba lagi nanti.</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-y-6 gap-x-2 justify-items-center">
+                  {/* Tombol WhatsApp */}
+                  <button onClick={shareWA} className="flex flex-col items-center gap-2 group outline-none">
+                    <div className="w-14 h-14 rounded-full bg-[#25D366] flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
+                      <MessageCircle className="w-7 h-7 fill-current" />
+                    </div>
+                    <span className="text-[11px] font-medium text-slate-600">WhatsApp</span>
+                  </button>
+
+                  {/* Tombol Salin */}
+                  <button onClick={copyToClipboard} className="flex flex-col items-center gap-2 group outline-none">
+                    <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform ${copied ? 'bg-slate-800' : 'bg-blue-500'}`}>
+                      {copied ? <Check className="w-7 h-7" /> : <Copy className="w-6 h-6" />}
+                    </div>
+                    <span className="text-[11px] font-medium text-slate-600">{copied ? 'Disalin' : 'Salin Link'}</span>
+                  </button>
+
+                  {/* Tombol System */}
+                  <button onClick={handleSmartShare} className="flex flex-col items-center gap-2 group outline-none">
+                    <div className="w-14 h-14 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 shadow-md group-hover:scale-110 transition-transform border border-slate-300">
+                      <MoreHorizontal className="w-7 h-7" />
+                    </div>
+                    <span className="text-[11px] font-medium text-slate-600">Lainnya</span>
+                  </button>
+                </div>
+
+                <div className="mt-8 p-3 bg-slate-100 rounded-2xl border border-slate-200 flex items-center gap-2 overflow-hidden">
+                  <p className="text-[9px] text-slate-400 truncate font-mono flex-1" title={link}>{link}</p>
+                  <Button 
+                    onClick={copyToClipboard} 
+                    size="sm" 
+                    variant="ghost" 
+                    className="h-6 px-2 text-[8px] text-slate-500 hover:text-slate-700"
+                  >
+                    {copied ? 'Disalin!' : 'Salin'}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-3 gap-y-6 gap-x-2 justify-items-center">
-              {/* Tombol WhatsApp: Berfungsi di Laptop & HP */}
-              <button onClick={shareWA} className="flex flex-col items-center gap-2 group outline-none">
-                <div className="w-14 h-14 rounded-full bg-[#25D366] flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
-                  <MessageCircle className="w-7 h-7 fill-current" />
-                </div>
-                <span className="text-[11px] font-medium text-slate-600">WhatsApp</span>
-              </button>
-
-              {/* Tombol Salin: Berfungsi di Laptop & HP */}
-              <button onClick={copyToClipboard} className="flex flex-col items-center gap-2 group outline-none">
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform ${copied ? 'bg-slate-800' : 'bg-blue-500'}`}>
-                  {copied ? <Check className="w-7 h-7" /> : <Copy className="w-6 h-6" />}
-                </div>
-                <span className="text-[11px] font-medium text-slate-600">{copied ? 'Disalin' : 'Salin Link'}</span>
-              </button>
-
-              {/* Tombol System (Ini yang akan muncul seperti gambar Facebook/Android di HP) */}
-              <button onClick={handleSmartShare} className="flex flex-col items-center gap-2 group outline-none">
-                <div className="w-14 h-14 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 shadow-md group-hover:scale-110 transition-transform border border-slate-300">
-                  <MoreHorizontal className="w-7 h-7" />
-                </div>
-                <span className="text-[11px] font-medium text-slate-600">Lainnya</span>
-              </button>
-            </div>
-
-            <div className="mt-8 p-3 bg-slate-100 rounded-2xl border border-slate-200 flex items-center gap-2 overflow-hidden">
-              <p className="text-[9px] text-slate-400 truncate font-mono flex-1" title={link}>{link}</p>
-              <Button 
-                onClick={copyToClipboard} 
-                size="sm" 
-                variant="ghost" 
-                className="h-6 px-2 text-[8px] text-slate-500 hover:text-slate-700"
-              >
-                {copied ? 'Disalin!' : 'Salin'}
-              </Button>
-            </div>
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
+        </div>
+      )}
+    </>
   );
 }
