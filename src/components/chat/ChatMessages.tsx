@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { FileText, ExternalLink, Loader2, Play, Pencil, Check, X } from 'lucide-react';
+import { Avatar } from '@/components/ui/avatar';
+import { FileText, ExternalLink, Loader2, Pencil, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
@@ -121,20 +121,15 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
             <div key={msg.id} className={`flex w-full group ${isUser ? 'justify-end' : 'justify-start'}`}>
               <div className={`flex max-w-[85%] md:max-w-[75%] gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                 
-                {/* AVATAR */}
-                <Avatar className="w-8 h-8 mt-1 border border-white/10 shadow-sm shrink-0">
-                  {isUser ? (
-                    <>
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.id}`} />
-                      <AvatarFallback className="bg-cyan-600 text-white text-xs">U</AvatarFallback>
-                    </>
-                  ) : (
+                {/* AVATAR - Hanya tampilkan untuk AI */}
+                {!isUser && (
+                  <Avatar className="w-8 h-8 mt-1 border border-white/10 shadow-sm shrink-0">
                     <div className="w-full h-full bg-cyan-500 flex items-center justify-center text-black font-bold text-xs">AI</div>
-                  )}
-                </Avatar>
+                  </Avatar>
+                )}
 
                 {/* AREA PESAN */}
-                <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} min-w-0 flex-1`}>
+                <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} min-w-0 flex-1 ${isUser ? 'pr-0' : 'pl-0'}`}>
                   
                   {isEditing ? (
                     // --- MODE EDIT ---
@@ -193,7 +188,7 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
         })}
         
         {isLoading && (
-          <div className="flex justify-start w-full animate-pulse pl-12">
+          <div className="flex justify-start w-full animate-pulse pl-11">
             <div className="bg-[#1e293b] px-4 py-3 rounded-2xl rounded-tl-none border border-white/5 flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-cyan-500" />
               <span className="text-xs text-slate-400">Sedang memproses...</span>
