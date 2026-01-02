@@ -143,8 +143,7 @@ export function ShareToGroupDialog({ messages, conversationTitle, conversationId
         `🕒 ${timestamp}\n\n` +
         `👀 **Klik link di bawah untuk melihat percakapan lengkap:**\n` +
         `🔗 ${shareLink}\n\n` +
-        `✨ Anda bisa melihat seluruh chat history dan diskusi bersama!\n` +
-        `💡 Ingin chat dengan AI juga? Daftar gratis di Nega Chatbot!`;
+        `✨ Anda bisa melihat seluruh chat history dan melanjutkan percakapan!`;
 
       // 4. Kirim ke semua grup yang dipilih
       const sharePromises = Array.from(selectedGroups).map(groupId =>
