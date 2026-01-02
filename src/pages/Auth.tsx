@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Bot, Mail, Key, ArrowLeft, Loader2 } from 'lucide-react';
+import { Bot, Mail, Key, ArrowLeft, Loader2, Phone, Github } from 'lucide-react';
+import { PhoneInput } from '@/components/PhoneInput';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Email tidak valid');
@@ -16,8 +17,10 @@ const Auth = () => {
   const { user, loading } = useAuth();
   const { toast } = useToast();
   
-  const [step, setStep] = useState<'email' | 'otp'>('email');
+  const [loginMethod, setLoginMethod] = useState<'email' | 'phone' | 'github'>('email');
+  const [step, setStep] = useState<'input' | 'otp'>('input');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
@@ -36,12 +39,23 @@ const Auth = () => {
   }, [countdown]);
 
   const handleSendOtp = async () => {
-    try {
-      emailSchema.parse(email);
-    } catch {
+    if (loginMethod === 'email') {
+      try {
+        emailSchema.parse(email);
+      } catch {
+        toast({
+          title: 'Email tidak valid',
+          description: 'Silakan masukkan alamat email yang benar.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    if (loginMethod === 'phone' && phone.length < 10) {
       toast({
-        title: 'Email tidak valid',
-        description: 'Silakan masukkan alamat email yang benar.',
+        title: 'Nomor HP tidak valid',
+        description: 'Silakan masukkan nomor HP yang benar.',
         variant: 'destructive',
       });
       return;
@@ -49,22 +63,38 @@ const Auth = () => {
 
     setIsLoading(true);
     try {
-      // PERBAIKAN: Menghapus emailRedirectTo agar Supabase mengirim KODE OTP (angka), bukan Magic Link.
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email,
-        options: {
-          shouldCreateUser: true,
-        },
-      });
-
-      if (error) throw error;
+      if (loginMethod === 'email') {
+        const { error } = await supabase.auth.signInWithOtp({
+          email: email,
+          options: {
+            shouldCreateUser: true,
+          },
+        });
+        if (error) throw error;
+        
+        toast({
+          title: 'OTP Terkirim!',
+          description: 'Silakan cek email Anda untuk kode verifikasi 6 digit.',
+        });
+      } else if (loginMethod === 'phone') {
+        // Phone OTP - Note: Requires Twilio setup in Supabase
+        const fullPhone = `+62${phone}`;
+        const { error } = await supabase.auth.signInWithOtp({
+          phone: fullPhone,
+          options: {
+            shouldCreateUser: true,
+          },
+        });
+        if (error) throw error;
+        
+        toast({
+          title: 'SMS OTP Terkirim!',
+          description: `Kode verifikasi telah dikirim ke +62${phone}`,
+        });
+      }
 
       setStep('otp');
       setCountdown(60);
-      toast({
-        title: 'OTP Terkirim!',
-        description: 'Silakan cek email Anda untuk kode verifikasi 6 digit.',
-      });
     } catch (error: any) {
       console.error('OTP error:', error);
       toast({
@@ -73,6 +103,33 @@ const Auth = () => {
         variant: 'destructive',
       });
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGitHubLogin = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/chat`,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Mengarahkan ke GitHub...',
+        description: 'Anda akan diarahkan ke halaman login GitHub.',
+      });
+    } catch (error: any) {
+      console.error('GitHub login error:', error);
+      toast({
+        title: 'Gagal login dengan GitHub',
+        description: error.message || 'Terjadi kesalahan. Coba lagi.',
+        variant: 'destructive',
+      });
       setIsLoading(false);
     }
   };
@@ -89,11 +146,24 @@ const Auth = () => {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: email,
-        token: otp,
-        type: 'email',
-      });
+      let error;
+      
+      if (loginMethod === 'email') {
+        const result = await supabase.auth.verifyOtp({
+          email: email,
+          token: otp,
+          type: 'email',
+        });
+        error = result.error;
+      } else if (loginMethod === 'phone') {
+        const fullPhone = `+62${phone}`;
+        const result = await supabase.auth.verifyOtp({
+          phone: fullPhone,
+          token: otp,
+          type: 'sms',
+        });
+        error = result.error;
+      }
 
       if (error) throw error;
 
@@ -150,39 +220,81 @@ const Auth = () => {
             </div>
           </div>
 
-          {step === 'email' ? (
+          {step === 'input' ? (
             <>
               <h2 className="text-xl font-semibold text-center mb-2">Masuk ke Nega</h2>
               <p className="text-sm text-muted-foreground text-center mb-8">
-                Masukkan email Anda untuk menerima kode OTP
+                Pilih metode login yang Anda inginkan
               </p>
 
+              {/* Login Method Tabs */}
+              <div className="flex rounded-lg bg-muted p-1 mb-6">
+                <button
+                  onClick={() => setLoginMethod('email')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                    loginMethod === 'email' 
+                      ? 'bg-background text-foreground shadow-sm' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Mail className="w-4 h-4" />
+                  Email
+                </button>
+                <button
+                  onClick={() => setLoginMethod('phone')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                    loginMethod === 'phone' 
+                      ? 'bg-background text-foreground shadow-sm' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Phone className="w-4 h-4" />
+                  HP
+                </button>
+                <button
+                  onClick={() => handleGitHubLogin()}
+                  disabled={isLoading}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors text-muted-foreground hover:text-foreground`}
+                >
+                  <Github className="w-4 h-4" />
+                  GitHub
+                </button>
+              </div>
+
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="nama@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 h-12 bg-input border-border focus:border-primary"
-                      onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
-                    />
+                {loginMethod === 'email' ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="nama@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 h-12 bg-input border-border focus:border-primary"
+                        onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
+                      />
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <PhoneInput
+                    value={phone}
+                    onChange={setPhone}
+                    disabled={isLoading}
+                  />
+                )}
 
                 <Button
                   onClick={handleSendOtp}
-                  disabled={isLoading || !email}
+                  disabled={isLoading || (loginMethod === 'email' ? !email : !phone)}
                   className="w-full h-12 gradient-primary text-primary-foreground hover:opacity-90"
                 >
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
-                    'Kirim Kode OTP'
+                    `Kirim Kode ${loginMethod === 'email' ? 'Email' : 'SMS'}`
                   )}
                 </Button>
               </div>
@@ -192,7 +304,9 @@ const Auth = () => {
               <h2 className="text-xl font-semibold text-center mb-2">Verifikasi OTP</h2>
               <p className="text-sm text-muted-foreground text-center mb-8">
                 Masukkan 6 digit kode yang dikirim ke<br />
-                <span className="text-foreground font-medium">{email}</span>
+                <span className="text-foreground font-medium">
+                  {loginMethod === 'email' ? email : `+62${phone}`}
+                </span>
               </p>
 
               <div className="space-y-4">
@@ -246,10 +360,10 @@ const Auth = () => {
 
                 <Button
                   variant="ghost"
-                  onClick={() => setStep('email')}
+                  onClick={() => setStep('input')}
                   className="w-full text-muted-foreground"
                 >
-                  Ganti email
+                  Ganti metode login
                 </Button>
               </div>
             </>
