@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Share2, Copy, Check, MessageCircle, Mail, MoreHorizontal } from 'lucide-react';
+import { Share2, Copy, Check, MessageCircle, MoreHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function GroupInfoDialog({ groupId, groupName, inviteCode }: { groupId: string, groupName: string, inviteCode?: string }) {
@@ -17,6 +17,11 @@ export function GroupInfoDialog({ groupId, groupName, inviteCode }: { groupId: s
 
   // FUNGSI UTAMA: Mencoba Share System, jika gagal maka Salin Link
   const handleSmartShare = async () => {
+    if (!link) {
+      toast.error('Link tidak tersedia untuk dibagikan');
+      return;
+    }
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -25,9 +30,13 @@ export function GroupInfoDialog({ groupId, groupName, inviteCode }: { groupId: s
           url: link,
         });
         toast.success('Menu berbagi dibuka!');
-      } catch (err) {
-        // Jika user membatalkan atau error, jangan tampilkan pesan error merah
-        console.log('Share dibatalkan atau tidak didukung browser');
+      } catch (err: any) {
+        // Jika user membatalkan, jangan tampilkan error
+        if (err.name !== 'AbortError') {
+          console.log('Share error:', err);
+          // Fallback ke copy
+          copyToClipboard();
+        }
       }
     } else {
       // JIKA DI LAPTOP (Fallback)
@@ -35,15 +44,50 @@ export function GroupInfoDialog({ groupId, groupName, inviteCode }: { groupId: s
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(link);
-    setCopied(true);
-    toast.success('Link grup berhasil disalin ke clipboard!');
-    setTimeout(() => setCopied(false), 2000);
+  const copyToClipboard = async () => {
+    if (!link) {
+      toast.error('Link tidak tersedia untuk disalin');
+      return;
+    }
+    
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      toast.success('Link grup berhasil disalin ke clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      // Fallback untuk browser yang tidak support clipboard API
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = link;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopied(true);
+        toast.success('Link grup berhasil disalin!');
+        setTimeout(() => setCopied(false), 2000);
+      } catch (fallbackErr) {
+        toast.error('Gagal menyalin link. Silakan salin manual.');
+        console.error('Copy failed:', fallbackErr);
+      }
+    }
   };
 
   const shareWA = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+    if (!link) {
+      toast.error('Link tidak tersedia untuk dibagikan');
+      return;
+    }
+    
+    try {
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+      window.open(waUrl, '_blank');
+      toast.success('WhatsApp dibuka!');
+    } catch (err) {
+      toast.error('Gagal membuka WhatsApp');
+      console.error('WhatsApp share failed:', err);
+    }
   };
 
   return (
@@ -92,7 +136,15 @@ export function GroupInfoDialog({ groupId, groupName, inviteCode }: { groupId: s
             </div>
 
             <div className="mt-8 p-3 bg-slate-100 rounded-2xl border border-slate-200 flex items-center gap-2 overflow-hidden">
-              <p className="text-[9px] text-slate-400 truncate font-mono flex-1">{link}</p>
+              <p className="text-[9px] text-slate-400 truncate font-mono flex-1" title={link}>{link}</p>
+              <Button 
+                onClick={copyToClipboard} 
+                size="sm" 
+                variant="ghost" 
+                className="h-6 px-2 text-[8px] text-slate-500 hover:text-slate-700"
+              >
+                {copied ? 'Disalin!' : 'Salin'}
+              </Button>
             </div>
           </>
         )}

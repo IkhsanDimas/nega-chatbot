@@ -43,9 +43,12 @@ const GroupChat = () => {
       setLoading(true);
       const { data: groupData } = await supabase.from('groups').select('name, invite_code').eq('id', groupId).single();
       if (groupData) {
+        console.log('GroupChat - Fetched group data:', groupData);
         setGroupName(groupData.name);
         setInviteCode(groupData.invite_code);
         setNewGroupName(groupData.name); // Siapkan nama untuk diedit
+      } else {
+        console.error('GroupChat - No group data found for ID:', groupId);
       }
       await fetchMessages();
       setLoading(false);

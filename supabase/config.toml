@@ -1,7 +1,7 @@
-project_id = "tbmxpzcjypaktqbeispu"
+project_id = "slsdltptkzrfzzcoqxjw"
 
 [functions.chat-with-ainya]
-verify_jwt = true
+verify_jwt = false
 
 [functions.send-otp]
 verify_jwt = false
