@@ -115,20 +115,20 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
   };
 
   return (
-    <ScrollArea className="flex-1 p-1 h-full bg-[#020617]">
-      <div className="flex flex-col pb-1">
+    <ScrollArea className="flex-1 p-3 h-full bg-[#020617]">
+      <div className="flex flex-col space-y-1 pb-3">
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
           const isEditing = editingId === msg.id;
 
           return (
             <div key={msg.id} className={`flex w-full group ${isUser ? 'justify-end' : 'justify-start'}`}>
-              <div className={`flex max-w-[90%] md:max-w-[80%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+              <div className={`flex max-w-[85%] md:max-w-[75%] gap-2 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                 
                 {/* AVATAR - Hanya tampilkan untuk AI */}
                 {!isUser && (
-                  <Avatar className="w-4 h-4 mr-1 border border-white/10 shadow-sm shrink-0">
-                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white font-bold text-[8px]" title={AI_MODEL_NAME}>
+                  <Avatar className="w-6 h-6 mt-0.5 border border-white/10 shadow-sm shrink-0">
+                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white font-bold text-xs" title={AI_MODEL_NAME}>
                       {AI_AVATAR_TEXT}
                     </div>
                   </Avatar>
@@ -159,12 +159,12 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
                   ) : (
                     // --- MODE TAMPILAN BIASA ---
                     <div className="relative group/bubble max-w-full">
-                      <div className={`px-2 py-0.5 rounded-lg text-sm shadow-sm overflow-hidden ${isUser ? 'bg-cyan-600 text-white rounded-tr-sm ml-1' : 'bg-[#1e293b] text-slate-200 border border-white/5 rounded-tl-sm'}`}>
+                      <div className={`px-3 py-2 rounded-xl text-sm shadow-sm overflow-hidden ${isUser ? 'bg-cyan-600 text-white rounded-tr-none' : 'bg-[#1e293b] text-slate-200 border border-white/5 rounded-tl-none'}`}>
                         
                         {renderAttachment(msg)}
                         
                         {msg.content && (
-                          <div className="prose prose-invert prose-sm max-w-none break-words leading-tight">
+                          <div className="prose prose-invert prose-sm max-w-none break-words leading-relaxed">
                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                           </div>
                         )}
@@ -183,7 +183,7 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
                     </div>
                   )}
 
-                  <span className="text-[7px] text-slate-600 opacity-50 select-none hidden">
+                  <span className="text-[10px] text-slate-500 mt-1 px-1 select-none opacity-70">
                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     {/* Indikator Edited (Opsional, akan muncul jika updated_at beda dengan created_at di masa depan) */}
                   </span>
@@ -194,10 +194,10 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
         })}
         
         {isLoading && (
-          <div className="flex justify-start w-full animate-pulse pl-5">
-            <div className="bg-[#1e293b] px-2 py-0.5 rounded-lg border border-white/5 flex items-center gap-1">
-              <Loader2 className="w-2.5 h-2.5 animate-spin text-blue-500" />
-              <span className="text-[9px] text-slate-400">Mengetik...</span>
+          <div className="flex justify-start w-full animate-pulse pl-8">
+            <div className="bg-[#1e293b] px-3 py-2 rounded-xl rounded-tl-none border border-white/5 flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+              <span className="text-xs text-slate-400">{AI_MODEL_NAME} sedang berpikir...</span>
             </div>
           </div>
         )}
