@@ -296,19 +296,19 @@ const GroupChat = () => {
                        </div>
                        
                        {/* Reply button - ALWAYS visible for ALL messages */}
-                       <div className={`flex ${isMe ? 'justify-start' : 'justify-end'} mt-1`}>
+                       <div className={`flex ${isMe ? 'justify-start' : 'justify-end'} mt-2`}>
                          <button
                            onClick={(e) => {
                              e.stopPropagation();
                              setReplyingTo(msg);
                              setSelectedMessageId(null);
                            }}
-                           className="flex items-center gap-1 px-3 py-1 text-xs bg-blue-500/20 hover:bg-blue-500/40 text-blue-400 hover:text-blue-300 rounded-full transition-all border border-blue-500/30 hover:border-blue-400"
+                           className="flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
                          >
-                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                            </svg>
-                           Balas
+                           Balas Pesan
                          </button>
                        </div>
                        {/* Action buttons for selected messages */}
