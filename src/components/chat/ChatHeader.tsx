@@ -4,7 +4,7 @@ import { Menu, Crown, Sparkles, Bot } from 'lucide-react';
 import { ShareToGroupDialog } from './ShareToGroupDialog';
 
 // AI Model Configuration
-const AI_MODEL_NAME = "Claude 3.5 Sonnet";
+const AI_MODEL_NAME = "Gemini 2.5 Flash";
 
 interface Message {
   id: string;
@@ -51,7 +51,7 @@ const ChatHeader = ({
         )}
         
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center">
             <Bot className="w-4 h-4 text-white" />
           </div>
           <div>

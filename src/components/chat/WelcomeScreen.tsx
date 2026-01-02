@@ -1,7 +1,7 @@
 import { Bot, Lightbulb, Code, FileText, Languages } from 'lucide-react';
 
 // AI Model Configuration
-const AI_MODEL_NAME = "Claude 3.5 Sonnet";
+const AI_MODEL_NAME = "Gemini 2.5 Flash";
 
 interface WelcomeScreenProps {
   onSuggestionClick: (message: string) => void;
@@ -36,7 +36,7 @@ const WelcomeScreen = ({ onSuggestionClick }: WelcomeScreenProps) => {
       <div className="max-w-2xl mx-auto text-center">
         {/* Logo & Welcome */}
         <div className="mb-8 animate-fade-in-up">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center mx-auto mb-6 glow-primary animate-bounce-subtle shadow-lg">
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center mx-auto mb-6 glow-primary animate-bounce-subtle shadow-lg">
             <Bot className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold mb-3">
