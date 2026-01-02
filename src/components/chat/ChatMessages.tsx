@@ -115,15 +115,15 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
   };
 
   return (
-    <ScrollArea className="flex-1 p-4 h-full bg-[#020617]">
-      <div className="flex flex-col space-y-0 pb-4">
+    <ScrollArea className="flex-1 p-2 h-full bg-[#020617]">
+      <div className="flex flex-col pb-2">
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
           const isEditing = editingId === msg.id;
 
           return (
-            <div key={msg.id} className={`flex w-full group ${isUser ? 'justify-end' : 'justify-start'}`}>
-              <div className={`flex max-w-[85%] md:max-w-[75%] gap-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div key={msg.id} className={`flex w-full group ${isUser ? 'justify-end' : 'justify-start'} mb-0.5`}>
+              <div className={`flex max-w-[90%] md:max-w-[80%] gap-0.5 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                 
                 {/* AVATAR - Hanya tampilkan untuk AI */}
                 {!isUser && (
@@ -159,12 +159,12 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
                   ) : (
                     // --- MODE TAMPILAN BIASA ---
                     <div className="relative group/bubble max-w-full">
-                      <div className={`px-2.5 py-1.5 rounded-2xl text-sm shadow-md overflow-hidden ${isUser ? 'bg-cyan-600 text-white rounded-tr-none' : 'bg-[#1e293b] text-slate-200 border border-white/5 rounded-tl-none'}`}>
+                      <div className={`px-2 py-1 rounded-xl text-sm shadow-sm overflow-hidden ${isUser ? 'bg-cyan-600 text-white rounded-tr-sm' : 'bg-[#1e293b] text-slate-200 border border-white/5 rounded-tl-sm'}`}>
                         
                         {renderAttachment(msg)}
                         
                         {msg.content && (
-                          <div className="prose prose-invert prose-sm max-w-none break-words leading-relaxed">
+                          <div className="prose prose-invert prose-sm max-w-none break-words leading-tight">
                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                           </div>
                         )}
