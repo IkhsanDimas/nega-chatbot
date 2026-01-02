@@ -1,6 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, Crown, Sparkles } from 'lucide-react';
+import { ShareToGroupDialog } from './ShareToGroupDialog';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  file_url?: string;
+  file_type?: string;
+  created_at: string;
+}
 
 interface ChatHeaderProps {
   isSidebarOpen: boolean;
@@ -8,6 +18,7 @@ interface ChatHeaderProps {
   conversationTitle?: string;
   remainingPrompts: number;
   isPro: boolean;
+  messages?: Message[];
 }
 
 const ChatHeader = ({
@@ -16,6 +27,7 @@ const ChatHeader = ({
   conversationTitle,
   remainingPrompts,
   isPro,
+  messages = [],
 }: ChatHeaderProps) => {
   const navigate = useNavigate();
 
@@ -42,6 +54,14 @@ const ChatHeader = ({
       </div>
 
       <div className="flex items-center gap-4">
+        {/* Share to Group Button */}
+        {messages.length > 0 && (
+          <ShareToGroupDialog 
+            messages={messages} 
+            conversationTitle={conversationTitle}
+          />
+        )}
+
         {/* Quota Display */}
         {isPro ? (
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm">

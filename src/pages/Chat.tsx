@@ -385,6 +385,7 @@ const Chat = () => {
           conversationTitle={currentConversation?.title}
           remainingPrompts={remainingPrompts}
           isPro={profile?.subscription_type === 'pro'}
+          messages={messages}
         />
 
         <div className="flex-1 overflow-hidden">
