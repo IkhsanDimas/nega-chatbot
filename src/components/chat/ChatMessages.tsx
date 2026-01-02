@@ -6,6 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
 
+// AI Model Configuration
+const AI_MODEL_NAME = "Claude 3.5 Sonnet";
+const AI_AVATAR_TEXT = "CS";
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -124,7 +128,9 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
                 {/* AVATAR - Hanya tampilkan untuk AI */}
                 {!isUser && (
                   <Avatar className="w-8 h-8 mt-1 border border-white/10 shadow-sm shrink-0">
-                    <div className="w-full h-full bg-cyan-500 flex items-center justify-center text-black font-bold text-xs">AI</div>
+                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold text-xs" title={AI_MODEL_NAME}>
+                      {AI_AVATAR_TEXT}
+                    </div>
                   </Avatar>
                 )}
 
@@ -190,8 +196,8 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
         {isLoading && (
           <div className="flex justify-start w-full animate-pulse pl-11">
             <div className="bg-[#1e293b] px-4 py-3 rounded-2xl rounded-tl-none border border-white/5 flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-cyan-500" />
-              <span className="text-xs text-slate-400">Sedang memproses...</span>
+              <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+              <span className="text-xs text-slate-400">{AI_MODEL_NAME} sedang berpikir...</span>
             </div>
           </div>
         )}

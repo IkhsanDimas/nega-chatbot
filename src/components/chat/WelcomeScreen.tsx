@@ -1,5 +1,8 @@
 import { Bot, Lightbulb, Code, FileText, Languages } from 'lucide-react';
 
+// AI Model Configuration
+const AI_MODEL_NAME = "Claude 3.5 Sonnet";
+
 interface WelcomeScreenProps {
   onSuggestionClick: (message: string) => void;
 }
@@ -33,14 +36,17 @@ const WelcomeScreen = ({ onSuggestionClick }: WelcomeScreenProps) => {
       <div className="max-w-2xl mx-auto text-center">
         {/* Logo & Welcome */}
         <div className="mb-8 animate-fade-in-up">
-          <div className="w-20 h-20 rounded-3xl gradient-primary flex items-center justify-center mx-auto mb-6 glow-primary animate-bounce-subtle">
-            <Bot className="w-10 h-10 text-primary-foreground" />
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center mx-auto mb-6 glow-primary animate-bounce-subtle shadow-lg">
+            <Bot className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold mb-3">
-            Halo! Saya <span className="text-gradient">Nega </span>
+            Halo! Saya <span className="text-gradient">Nega</span>
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-lg mb-2">
             Asisten AI cerdas yang siap membantu Anda. Ada yang bisa saya bantu hari ini?
+          </p>
+          <p className="text-sm text-muted-foreground/70">
+            Powered by {AI_MODEL_NAME}
           </p>
         </div>
 

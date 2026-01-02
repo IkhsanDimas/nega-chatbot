@@ -1,7 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, Crown, Sparkles } from 'lucide-react';
+import { Menu, Crown, Sparkles, Bot } from 'lucide-react';
 import { ShareToGroupDialog } from './ShareToGroupDialog';
+
+// AI Model Configuration
+const AI_MODEL_NAME = "Claude 3.5 Sonnet";
 
 interface Message {
   id: string;
@@ -47,11 +50,18 @@ const ChatHeader = ({
           </Button>
         )}
         
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
-          <h1 className="font-medium text-foreground">
-            {conversationTitle || 'Nega'}
-          </h1>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+            <Bot className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h1 className="font-medium text-foreground">
+              {conversationTitle || 'Chat Baru'}
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Powered by {AI_MODEL_NAME}
+            </p>
+          </div>
         </div>
       </div>
 
