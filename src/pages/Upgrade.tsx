@@ -175,7 +175,7 @@ const Upgrade = () => {
                 </li>
                 <li className="flex gap-3">
                   <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-medium shrink-0">3</span>
-                  <span>Setelah pembayaran berhasil, akun akan otomatis di-upgrade dalam 1x24 jam</span>
+                  <span>Setelah pembayaran berhasil, akun akan langsung di-upgrade ke PRO</span>
                 </li>
               </ol>
             </div>
