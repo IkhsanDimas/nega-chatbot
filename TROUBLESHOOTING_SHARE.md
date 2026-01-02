@@ -1,4 +1,4 @@
-# Troubleshooting Group Share
+# Troubleshooting Group Share & Reply Feature
 
 ## Langkah Test Fitur Sharing
 
@@ -30,6 +30,28 @@ Format link: `https://nega-chatbot.vercel.app/join/INVITE_CODE`
 
 Contoh: `https://nega-chatbot.vercel.app/join/a1b2c3d4e5f6`
 
+## Test Fitur Reply (Balas Pesan)
+
+### 1. Test Reply Button
+- Hover mouse di atas pesan orang lain → tombol reply muncul di kanan
+- Klik pesan sendiri → menu aksi muncul dengan tombol "Balas"
+- Klik tombol reply → preview muncul di input area
+
+### 2. Test Reply Preview
+- Setelah klik reply, harus muncul preview di atas input
+- Preview menampilkan nama pengirim dan sebagian isi pesan
+- Ada tombol X untuk cancel reply
+
+### 3. Test Send Reply
+- Ketik pesan balasan dan kirim
+- Pesan harus muncul dengan preview pesan yang dibalas di atasnya
+- Visual: border cyan di kiri pesan yang merupakan reply
+
+### 4. Database Migration Status
+**PENTING:** Fitur reply memerlukan database migration!
+- Lihat file `MIGRATION_INSTRUCTIONS.md` untuk langkah-langkah
+- Tanpa migration, reply tetap berfungsi tapi tidak tersimpan relasi
+
 ## Kemungkinan Masalah
 
 ### Masalah 1: Invite Code Kosong
@@ -52,6 +74,13 @@ Contoh: `https://nega-chatbot.vercel.app/join/a1b2c3d4e5f6`
 - Cek apakah route `/join/:inviteCode` berfungsi
 - Lihat console untuk error di JoinGroup page
 
+### Masalah 4: Reply Tidak Tersimpan
+**Gejala:** Reply berfungsi tapi tidak muncul setelah refresh
+**Solusi:**
+- Jalankan database migration (lihat MIGRATION_INSTRUCTIONS.md)
+- Cek console untuk SQL errors
+- Fallback handling akan tetap kirim pesan tanpa relasi
+
 ## Test Commands
 
 Untuk test di console browser:
@@ -65,4 +94,10 @@ if (navigator.share) {
 } else {
   console.log('Share API not supported');
 }
+
+// Test reply functionality
+console.log('Reply feature status:', {
+  replyButtons: document.querySelectorAll('[title="Balas pesan"]').length,
+  replyPreview: document.querySelector('.border-cyan-500') !== null
+});
 ```

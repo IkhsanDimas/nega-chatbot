@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Send, Loader2, Users, User, Trash2, Edit2, X, Check, Pencil } from 'lucide-react';
+import { ArrowLeft, Send, Loader2, Trash2, Edit2, X, Check, Pencil } from 'lucide-react';
 import { GroupInfoDialog } from '@/components/GroupInfoDialog';
 import { SharedChatPreview } from '@/components/chat/SharedChatPreview';
 import { toast } from 'sonner';
@@ -71,12 +71,17 @@ const GroupChat = () => {
                       'Unknown User';
     
     return (
-      <div className="mb-2 p-2 bg-black/20 border-l-2 border-cyan-400 rounded text-xs">
-        <div className="text-cyan-400 font-medium mb-1">↳ Membalas {senderName}</div>
+      <div className="mb-2 p-2 bg-black/30 border-l-3 border-cyan-400 rounded-r text-xs">
+        <div className="text-cyan-400 font-medium mb-1 flex items-center gap-1">
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+          </svg>
+          {senderName}
+        </div>
         <div className="text-white/70 line-clamp-2">
-          {replyToMessage.content.length > 100 
+          {replyToMessage.content && replyToMessage.content.length > 100 
             ? replyToMessage.content.substring(0, 100) + '...'
-            : replyToMessage.content
+            : replyToMessage.content || 'Pesan tidak tersedia'
           }
         </div>
       </div>
@@ -85,28 +90,55 @@ const GroupChat = () => {
 
   const fetchMessages = async () => {
     if (!groupId) return;
-    const { data, error } = await supabase
-      .from('group_messages')
-      .select(`
-        *,
-        reply_to_message:reply_to (
-          id,
-          content,
-          user_id,
+    
+    try {
+      // Try to fetch with reply_to first
+      const { data, error } = await supabase
+        .from('group_messages')
+        .select(`
+          *,
+          reply_to_message:reply_to (
+            id,
+            content,
+            user_id,
+            profiles!group_messages_user_id_fkey (
+              display_name,
+              email
+            )
+          ),
           profiles!group_messages_user_id_fkey (
             display_name,
             email
           )
-        ),
-        profiles!group_messages_user_id_fkey (
-          display_name,
-          email
-        )
-      `)
-      .eq('group_id', groupId)
-      .order('created_at', { ascending: true });
-    
-    if (!error && data) setMessages(data);
+        `)
+        .eq('group_id', groupId)
+        .order('created_at', { ascending: true });
+      
+      if (!error && data) {
+        setMessages(data);
+      } else {
+        // Fallback: fetch without reply_to if column doesn't exist yet
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('group_messages')
+          .select('*')
+          .eq('group_id', groupId)
+          .order('created_at', { ascending: true });
+        
+        if (!fallbackError && fallbackData) {
+          setMessages(fallbackData);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+      // Final fallback
+      const { data: basicData } = await supabase
+        .from('group_messages')
+        .select('*')
+        .eq('group_id', groupId)
+        .order('created_at', { ascending: true });
+      
+      if (basicData) setMessages(basicData);
+    }
   };
 
   useEffect(() => {
@@ -175,12 +207,23 @@ const GroupChat = () => {
     setNewMessage('');
     setReplyingTo(null); // Clear reply state
     
-    await supabase.from('group_messages').insert({ 
-      group_id: groupId, 
-      user_id: profile.id, 
-      content,
-      reply_to: replyToId
-    });
+    try {
+      // Try to insert with reply_to
+      await supabase.from('group_messages').insert({ 
+        group_id: groupId, 
+        user_id: profile.id, 
+        content,
+        reply_to: replyToId
+      });
+    } catch (error) {
+      // Fallback: insert without reply_to if column doesn't exist
+      console.log('Fallback: inserting without reply_to');
+      await supabase.from('group_messages').insert({ 
+        group_id: groupId, 
+        user_id: profile.id, 
+        content
+      });
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center h-screen bg-black"><Loader2 className="w-8 h-8 animate-spin text-cyan-500" /></div>;
@@ -227,8 +270,8 @@ const GroupChat = () => {
              /* ... Logika Pesan Sama Persis ... */
              const isMe = msg.user_id === profile?.id;
              return (
-               <div key={msg.id} className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'}`}>
-                 <div className={`flex max-w-[85%] flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+               <div key={msg.id} className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'} group`}>
+                 <div className={`flex max-w-[85%] flex-col ${isMe ? 'items-end' : 'items-start'} relative`}>
                    {editingId === msg.id ? (
                      <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded-xl border border-cyan-500">
                        <input value={editValue} onChange={(e) => setEditValue(e.target.value)} className="bg-transparent text-white outline-none w-full" autoFocus />
@@ -239,7 +282,11 @@ const GroupChat = () => {
                      <>
                        <div 
                          onClick={(e) => { e.stopPropagation(); isMe && setSelectedMessageId(selectedMessageId === msg.id ? null : msg.id); }}
-                         className={`px-4 py-3 text-sm transition-all active:scale-95 ${isMe ? 'bg-cyan-500 text-black rounded-2xl rounded-br-none' : 'bg-zinc-800 text-white rounded-2xl rounded-bl-none'}`}
+                         className={`px-4 py-3 text-sm transition-all active:scale-95 ${
+                           isMe 
+                             ? 'bg-cyan-500 text-black rounded-2xl rounded-br-none' 
+                             : 'bg-zinc-800 text-white rounded-2xl rounded-bl-none'
+                         } ${msg.reply_to_message ? 'border-l-2 border-cyan-400/50' : ''}`}
                        >
                          {/* Render replied message preview */}
                          {msg.reply_to_message && renderReplyPreview(msg.reply_to_message)}
@@ -248,31 +295,33 @@ const GroupChat = () => {
                          {renderMessageContent(msg)}
                        </div>
                        
+                       {/* Reply button - ALWAYS visible for ALL messages */}
+                       <div className={`flex ${isMe ? 'justify-start' : 'justify-end'} mt-1`}>
+                         <button
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             setReplyingTo(msg);
+                             setSelectedMessageId(null);
+                           }}
+                           className="flex items-center gap-1 px-3 py-1 text-xs bg-blue-500/20 hover:bg-blue-500/40 text-blue-400 hover:text-blue-300 rounded-full transition-all border border-blue-500/30 hover:border-blue-400"
+                         >
+                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                           </svg>
+                           Balas
+                         </button>
+                       </div>
+                       {/* Action buttons for selected messages */}
                        {selectedMessageId === msg.id && isMe && (
-                         <div className="flex gap-4 mt-2 animate-in fade-in slide-in-from-top-1">
-                           <Button size="sm" onClick={() => { setEditingId(msg.id); setEditValue(msg.content); setSelectedMessageId(null); }} className="bg-zinc-700 text-white gap-2 rounded-full px-4 h-10 shadow-lg border border-white/10">
-                             <Edit2 className="w-4 h-4 text-cyan-400" /> Edit
+                         <div className="flex gap-2 mt-2 animate-in fade-in slide-in-from-top-1">
+                           <Button size="sm" onClick={() => { setEditingId(msg.id); setEditValue(msg.content); setSelectedMessageId(null); }} className="bg-zinc-700 text-white gap-2 rounded-full px-3 h-8 shadow-lg border border-white/10">
+                             <Edit2 className="w-3 h-3 text-cyan-400" /> Edit
                            </Button>
-                           <Button size="sm" onClick={() => handleDelete(msg.id)} className="bg-red-500/20 text-red-500 gap-2 rounded-full px-4 h-10 shadow-lg border border-red-500/30 hover:bg-red-500 hover:text-white">
-                             <Trash2 className="w-4 h-4" /> Hapus
+                           <Button size="sm" onClick={() => handleDelete(msg.id)} className="bg-red-500/20 text-red-500 gap-2 rounded-full px-3 h-8 shadow-lg border border-red-500/30 hover:bg-red-500 hover:text-white">
+                             <Trash2 className="w-3 h-3" /> Hapus
                            </Button>
                          </div>
                        )}
-
-                       {/* Reply button - show on hover for all messages */}
-                       <button
-                         onClick={(e) => {
-                           e.stopPropagation();
-                           setReplyingTo(msg);
-                           setSelectedMessageId(null);
-                         }}
-                         className="absolute -right-8 top-2 p-1.5 text-slate-500 hover:text-cyan-400 opacity-0 group-hover:opacity-100 transition-all transform hover:scale-110 bg-[#020617]/80 rounded-full"
-                         title="Balas pesan"
-                       >
-                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                         </svg>
-                       </button>
                      </>
                    )}
                  </div>
