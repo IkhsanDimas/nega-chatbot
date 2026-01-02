@@ -49,10 +49,59 @@ const GroupChat = () => {
   const renderMessageContent = (msg: any) => {
     const sharedLink = detectSharedChatLink(msg.content);
     
-    // Check if message is a sticker (single large emoji)
-    const isSticker = msg.content.length <= 2 && /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+$/u.test(msg.content);
+    // Check if message is a sticker (starts with STICKER:)
+    if (msg.content.startsWith('STICKER:')) {
+      const [, stickerId, content, style] = msg.content.split(':');
+      
+      // If it's an image URL sticker
+      if (content.startsWith('http')) {
+        return (
+          <div className="flex items-center justify-center p-2">
+            <img 
+              src={content} 
+              alt="Sticker"
+              className="w-32 h-32 object-cover rounded-lg shadow-lg"
+              onError={(e) => {
+                // Fallback to emoji sticker if image fails
+                e.currentTarget.outerHTML = `<div class="w-32 h-32 flex items-center justify-center text-8xl">🎭</div>`;
+              }}
+            />
+          </div>
+        );
+      }
+      
+      // If it's an emoji sticker with gradient background
+      const getStickerBackground = (style: string) => {
+        const gradients = {
+          'gradient-blue': 'bg-gradient-to-br from-blue-400 to-blue-600',
+          'gradient-pink': 'bg-gradient-to-br from-pink-400 to-pink-600',
+          'gradient-orange': 'bg-gradient-to-br from-orange-400 to-orange-600',
+          'gradient-rainbow': 'bg-gradient-to-br from-purple-400 via-pink-500 to-red-500',
+          'gradient-purple': 'bg-gradient-to-br from-purple-400 to-purple-600',
+          'gradient-yellow': 'bg-gradient-to-br from-yellow-400 to-yellow-600',
+          'gradient-red': 'bg-gradient-to-br from-red-400 to-red-600',
+          'gradient-green': 'bg-gradient-to-br from-green-400 to-green-600',
+          'gradient-gray': 'bg-gradient-to-br from-gray-400 to-gray-600',
+          'gradient-white': 'bg-gradient-to-br from-gray-100 to-gray-300',
+          'gradient-brown': 'bg-gradient-to-br from-amber-600 to-amber-800',
+          'default': 'bg-gradient-to-br from-cyan-400 to-cyan-600'
+        };
+        return gradients[style] || gradients.default;
+      };
+      
+      return (
+        <div className="flex items-center justify-center p-2">
+          <div className={`w-24 h-24 flex items-center justify-center text-6xl rounded-2xl shadow-lg transform hover:scale-105 transition-transform ${getStickerBackground(style)}`}>
+            {content}
+          </div>
+        </div>
+      );
+    }
     
-    if (isSticker) {
+    // Check if message is a regular emoji (single large emoji)
+    const isEmoji = msg.content.length <= 2 && /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+$/u.test(msg.content);
+    
+    if (isEmoji) {
       return (
         <div className="flex items-center justify-center p-2">
           <span className="text-6xl">{msg.content}</span>
@@ -315,8 +364,8 @@ const GroupChat = () => {
                              : 'bg-zinc-800 text-white rounded-2xl rounded-bl-none'
                          } ${msg.reply_to_message ? 'border-l-2 border-cyan-400/50' : ''} ${
                            // Check if message is a sticker for special styling
-                           msg.content.length <= 2 && /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+$/u.test(msg.content)
-                             ? 'bg-transparent border-2 border-dashed border-cyan-400/30 p-2' 
+                           msg.content.startsWith('STICKER:') || (msg.content.length <= 2 && /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+$/u.test(msg.content))
+                             ? 'bg-transparent p-1' 
                              : ''
                          }`}
                        >
