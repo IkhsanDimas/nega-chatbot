@@ -19,30 +19,29 @@ export function CreateGroupDialog() {
     setLoading(true);
 
     try {
-      // 1. Buat Kode Unik
-      const code = Math.random().toString(36).substring(2, 10);
-
-      // 2. Simpan ke Database (PERBAIKAN: Menambahkan created_by)
+      // Simpan ke Database - biarkan database generate invite_code otomatis
       const { data: group, error: groupError } = await supabase
         .from('groups')
         .insert({ 
-          name: name, 
-          invite_code: code,
-          created_by: user.id // <--- INI YANG SEBELUMNYA KURANG
+          name: name.trim(), 
+          created_by: user.id
+          // invite_code akan di-generate otomatis oleh database
         })
         .select()
         .single();
 
       if (groupError) throw groupError;
 
-      // 3. Masukkan Pembuat sebagai Admin
+      console.log('Created group with invite_code:', group.invite_code);
+
+      // Masukkan Pembuat sebagai Admin
       const { error: memberError } = await supabase
         .from('group_members')
         .insert({ group_id: group.id, user_id: user.id, role: 'admin' });
 
       if (memberError) throw memberError;
 
-      toast.success('Grup berhasil dibuat!');
+      toast.success(`Grup "${group.name}" berhasil dibuat!`);
       setName('');
       setOpen(false);
       
