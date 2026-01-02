@@ -5,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Send, Loader2, Trash2, Edit2, X, Check, Pencil } from 'lucide-react';
+import { ArrowLeft, Send, Loader2, Trash2, Edit2, X, Check, Pencil, Smile } from 'lucide-react';
 import { GroupInfoDialog } from '@/components/GroupInfoDialog';
 import { SharedChatPreview } from '@/components/chat/SharedChatPreview';
+import EmojiPicker from '@/components/chat/EmojiPicker';
 import { toast } from 'sonner';
 
 const GroupChat = () => {
@@ -29,6 +30,9 @@ const GroupChat = () => {
   // State Reply
   const [replyingTo, setReplyingTo] = useState<any | null>(null);
 
+  // State Emoji & Sticker
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
   // State Edit Nama Grup
   const [isEditingName, setIsEditingName] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -44,6 +48,17 @@ const GroupChat = () => {
   // Fungsi untuk render konten pesan
   const renderMessageContent = (msg: any) => {
     const sharedLink = detectSharedChatLink(msg.content);
+    
+    // Check if message is a sticker (single large emoji)
+    const isSticker = msg.content.length <= 2 && /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+$/u.test(msg.content);
+    
+    if (isSticker) {
+      return (
+        <div className="flex items-center justify-center p-2">
+          <span className="text-6xl">{msg.content}</span>
+        </div>
+      );
+    }
     
     if (sharedLink) {
       // Jika ada shared chat link, tampilkan preview
@@ -206,6 +221,7 @@ const GroupChat = () => {
     
     setNewMessage('');
     setReplyingTo(null); // Clear reply state
+    setShowEmojiPicker(false); // Close emoji picker
     
     try {
       // Try to insert with reply_to
@@ -224,6 +240,17 @@ const GroupChat = () => {
         content
       });
     }
+  };
+
+  // Handle emoji selection
+  const handleEmojiSelect = (emoji: string) => {
+    setNewMessage(prev => prev + emoji);
+  };
+
+  // Handle sticker selection
+  const handleStickerSelect = (sticker: string) => {
+    setNewMessage(sticker); // Replace entire message with sticker
+    setShowEmojiPicker(false);
   };
 
   if (loading) return <div className="flex items-center justify-center h-screen bg-black"><Loader2 className="w-8 h-8 animate-spin text-cyan-500" /></div>;
@@ -286,7 +313,12 @@ const GroupChat = () => {
                            isMe 
                              ? 'bg-cyan-500 text-black rounded-2xl rounded-br-none' 
                              : 'bg-zinc-800 text-white rounded-2xl rounded-bl-none'
-                         } ${msg.reply_to_message ? 'border-l-2 border-cyan-400/50' : ''}`}
+                         } ${msg.reply_to_message ? 'border-l-2 border-cyan-400/50' : ''} ${
+                           // Check if message is a sticker for special styling
+                           msg.content.length <= 2 && /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+$/u.test(msg.content)
+                             ? 'bg-transparent border-2 border-dashed border-cyan-400/30 p-2' 
+                             : ''
+                         }`}
                        >
                          {/* Render replied message preview */}
                          {msg.reply_to_message && renderReplyPreview(msg.reply_to_message)}
@@ -333,7 +365,7 @@ const GroupChat = () => {
       </div>
 
       {/* INPUT */}
-      <div className="p-4 bg-[#020617] border-t border-white/10">
+      <div className="p-4 bg-[#020617] border-t border-white/10 relative">
         {/* Reply Preview */}
         {replyingTo && (
           <div className="mb-3 p-3 bg-zinc-900 border border-cyan-500/30 rounded-lg">
@@ -360,6 +392,15 @@ const GroupChat = () => {
           </div>
         )}
 
+        {/* Emoji Picker */}
+        {showEmojiPicker && (
+          <EmojiPicker
+            onEmojiSelect={handleEmojiSelect}
+            onStickerSelect={handleStickerSelect}
+            onClose={() => setShowEmojiPicker(false)}
+          />
+        )}
+
         <form onSubmit={handleSendMessage} className="flex gap-2">
           <Input 
             placeholder={replyingTo ? "Tulis balasan..." : "Ketik pesan..."} 
@@ -367,6 +408,14 @@ const GroupChat = () => {
             onChange={(e) => setNewMessage(e.target.value)} 
             className="bg-zinc-900 border-white/5 text-white h-12 rounded-xl" 
           />
+          <Button 
+            type="button"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            size="icon" 
+            className="bg-yellow-500 hover:bg-yellow-600 text-black h-12 w-12 rounded-xl shrink-0"
+          >
+            <Smile className="w-5 h-5" />
+          </Button>
           <Button type="submit" size="icon" className="bg-cyan-500 text-black h-12 w-12 rounded-xl shrink-0">
             <Send />
           </Button>
