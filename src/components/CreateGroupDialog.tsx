@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ export function CreateGroupDialog() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +46,7 @@ export function CreateGroupDialog() {
       toast.success(`Grup "${group.name}" berhasil dibuat!`);
       setName('');
       setOpen(false);
+      navigate(`/groups/${group.id}`);
       
     } catch (error: any) {
       console.error(error);
