@@ -267,10 +267,11 @@ const Chat = () => {
         fileType = file.type;
       }
 
+      let isNewConversation = false;
       if (!convId) {
+        isNewConversation = true;
         convId = await createNewConversation(content || (file ? 'Mengirim file...' : 'Percakapan Baru'));
         if (!convId) throw new Error('Failed to create conversation');
-        navigate(`/chat/${convId}`);
       }
 
       const userMessage: Message = {
@@ -282,8 +283,10 @@ const Chat = () => {
         created_at: new Date().toISOString(),
       };
 
+      // 1. Update state secara optimis
       setMessages(prev => [...prev, userMessage]);
 
+      // 2. Insert ke database dan tunggu sampai selesai
       await supabase.from('messages').insert({
         conversation_id: convId,
         role: 'user',
@@ -291,6 +294,11 @@ const Chat = () => {
         file_url: fileUrl,
         file_type: fileType,
       });
+
+      // 3. Lakukan navigasi hanya SETELAH data aman tersimpan di database
+      if (isNewConversation) {
+        navigate(`/chat/${convId}`);
+      }
 
 
       const response = await supabase.functions.invoke('chat-with-ainya', {
