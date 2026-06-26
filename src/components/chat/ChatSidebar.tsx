@@ -84,15 +84,15 @@ const ChatSidebar = ({
       )}
 
       <div className={cn(
-        "fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#030712] border-r border-white/5 flex flex-col transition-transform duration-300 ease-in-out transform",
+        "fixed md:static inset-y-0 left-0 z-50 w-66 bg-[#070913] border-r border-white/5 flex flex-col transition-transform duration-300 ease-in-out transform",
         isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0 md:w-0 md:hidden"
       )}>
         
         {/* Brand Header */}
-        <div className="p-5 flex items-center justify-between border-b border-white/5 bg-[#030712]">
+        <div className="p-5 flex items-center justify-between border-b border-white/5 bg-[#070913]">
           <div className="flex items-center gap-3 font-extrabold text-white">
-            <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm shadow-md shadow-cyan-500/10">N</div>
-            <span className="tracking-tight text-base font-bold">Nega Chatbot</span>
+            <div className="w-9 h-9 bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white text-base font-black shadow-md shadow-cyan-500/25 group-hover:scale-105 transition-transform duration-300">N</div>
+            <span className="tracking-tight text-base font-extrabold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">Nega Chatbot</span>
           </div>
           <Button variant="ghost" size="icon" onClick={onToggle} className="md:hidden text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl">
             <X className="w-5 h-5" />
@@ -103,20 +103,20 @@ const ChatSidebar = ({
         <div className="p-4">
           <Button 
             onClick={onNewChat} 
-            className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-semibold rounded-xl gap-2 shadow-lg shadow-cyan-500/5 hover:scale-[1.01] active:scale-[0.99] transition-all"
+            className="w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 hover:opacity-90 text-white font-bold rounded-xl gap-2 shadow-lg shadow-cyan-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 border border-cyan-400/20"
           >
             <Plus className="w-4 h-4" /> Chat Baru
           </Button>
         </div>
 
-        <ScrollArea className="flex-1 px-3">
+        <ScrollArea className="flex-1 px-3 scrollbar-thin">
           {/* Conversation History List */}
           <div className="mb-8 mt-2">
             <p className="px-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3 select-none">Riwayat Chat</p>
             <div className="space-y-1">
               {conversations.length === 0 && (
                 <div className="px-4 py-8 text-center border border-dashed border-white/5 rounded-2xl select-none">
-                  <p className="text-xs text-zinc-600">Belum ada riwayat</p>
+                  <p className="text-xs text-zinc-600 font-medium">Belum ada riwayat</p>
                 </div>
               )}
               
@@ -127,14 +127,22 @@ const ChatSidebar = ({
                   <div
                     key={chat.id}
                     className={cn(
-                      "group flex items-center justify-between p-2.5 rounded-xl transition-all cursor-pointer border border-transparent",
-                      isActive ? "bg-cyan-950/20 border-cyan-500/10" : "hover:bg-white/[0.02]"
+                      "group flex items-center justify-between p-2.5 rounded-xl transition-all cursor-pointer border relative overflow-hidden",
+                      isActive 
+                        ? "bg-cyan-500/5 border-cyan-500/20 shadow-[inset_0_1px_0_0_rgba(6,182,212,0.1)] text-cyan-200" 
+                        : "hover:bg-white/[0.02] border-transparent text-zinc-400"
                     )}
                     onClick={() => onNavigate(chat.id)}
                   >
-                    <div className="flex items-center gap-3 min-w-0 overflow-hidden">
-                      <MessageSquare className={cn("w-4 h-4 shrink-0", isActive ? "text-cyan-400" : "text-zinc-600")} />
-                      <span className={cn("truncate text-sm font-medium", isActive ? "text-cyan-100" : "text-zinc-400")}>
+                    {/* Active Left Indicator Strip */}
+                    <div className={cn(
+                      "absolute left-0 top-1/4 bottom-1/4 w-1 rounded-r bg-cyan-500 transition-opacity duration-300",
+                      isActive ? "opacity-100" : "opacity-0"
+                    )} />
+
+                    <div className="flex items-center gap-3 min-w-0 overflow-hidden pl-1">
+                      <MessageSquare className={cn("w-4 h-4 shrink-0 transition-colors", isActive ? "text-cyan-400" : "text-zinc-600 group-hover:text-zinc-400")} />
+                      <span className={cn("truncate text-sm font-semibold transition-colors", isActive ? "text-cyan-200" : "text-zinc-400 group-hover:text-zinc-200")}>
                         {chat.title || 'Percakapan Baru'}
                       </span>
                     </div>
@@ -168,7 +176,7 @@ const ChatSidebar = ({
                   className="flex items-center gap-3 p-2.5 rounded-xl cursor-pointer text-zinc-400 hover:bg-white/[0.02] hover:text-white transition-all border border-transparent"
                 >
                   <Hash className="w-4 h-4 text-zinc-600 shrink-0" />
-                  <span className="truncate text-sm font-medium">{grp.name}</span>
+                  <span className="truncate text-sm font-semibold">{grp.name}</span>
                 </div>
               ))}
             </div>
@@ -176,32 +184,34 @@ const ChatSidebar = ({
         </ScrollArea>
 
         {/* User Account / Status Footer */}
-        <div className="p-4 border-t border-white/5 bg-[#030712] shrink-0">
+        <div className="p-4 border-t border-white/5 bg-[#070913] shrink-0">
           <div className={cn(
-            "flex items-center justify-between gap-2.5 p-2.5 rounded-2xl border transition-colors",
-            isPro ? "bg-cyan-950/10 border-cyan-500/10 animate-pulse-slow" : "bg-white/[0.01] border-white/5"
+            "flex items-center justify-between gap-2.5 p-2.5 rounded-2xl border transition-all duration-300",
+            isPro ? "bg-amber-500/5 border-amber-500/20 shadow-lg shadow-amber-500/5" : "bg-white/[0.01] border-white/5"
           )}>
             
             <div className="flex items-center gap-3 min-w-0 overflow-hidden">
               <div className={cn(
                 "w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-md",
-                isPro ? "bg-gradient-to-tr from-yellow-400 to-amber-600 shadow-lg shadow-yellow-500/10 text-black" : "bg-gradient-to-tr from-cyan-500 to-blue-600"
+                isPro 
+                  ? "bg-gradient-to-tr from-amber-400 via-yellow-500 to-orange-500 shadow-lg text-black font-black" 
+                  : "bg-gradient-to-tr from-cyan-500 to-indigo-600 font-bold"
               )}>
                 {isPro ? <Crown className="w-4 h-4 text-zinc-950" /> : user?.email?.charAt(0).toUpperCase()}
               </div>
               
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-white truncate leading-none">{user?.email?.split('@')[0]}</p>
-                <p className="text-[10px] text-zinc-500 truncate mt-0.5 leading-none">{user?.email}</p>
+                <p className="text-xs font-bold text-white truncate leading-none">{user?.email?.split('@')[0]}</p>
+                <p className="text-[10px] text-zinc-500 truncate mt-1 leading-none font-medium">{user?.email}</p>
                 
-                <div className="flex items-center gap-1.5 mt-1.5">
+                <div className="flex items-center gap-1.5 mt-2">
                   <div className={cn(
                     "w-1.5 h-1.5 rounded-full animate-pulse",
-                    isPro ? "bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]" : "bg-zinc-500"
+                    isPro ? "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]" : "bg-zinc-500"
                   )} />
                   <p className={cn(
                     "text-[8px] font-extrabold uppercase tracking-wider",
-                    isPro ? "text-yellow-400" : "text-zinc-500"
+                    isPro ? "text-amber-400" : "text-zinc-500"
                   )}>
                     {isPro ? 'PRO' : 'FREE'}
                   </p>

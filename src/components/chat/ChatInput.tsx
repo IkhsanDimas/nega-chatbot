@@ -148,13 +148,13 @@ const ChatInput = ({ onSend, isLoading, disabled }: ChatInputProps) => {
   };
 
   return (
-    <div className="p-4 md:p-6 bg-[#030712] border-t border-white/5 relative z-10">
+    <div className="p-4 md:pb-6 md:pt-2 bg-transparent relative z-10">
       <div className="max-w-4xl mx-auto">
         
         {/* FILE PREVIEW */}
         {selectedFile && previewUrl && (
           <div className="mb-3 animate-in slide-in-from-bottom-3 fade-in duration-200">
-            <div className="relative inline-flex items-center gap-3 p-2 pr-10 bg-slate-900/60 border border-white/10 rounded-xl group">
+            <div className="relative inline-flex items-center gap-3 p-2.5 pr-10 bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-xl group shadow-lg">
               <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity">
                 {selectedFile.type.startsWith('image/') ? (
                   <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/5 bg-black/50 shrink-0">
@@ -167,12 +167,12 @@ const ChatInput = ({ onSend, isLoading, disabled }: ChatInputProps) => {
                 )}
                 <div className="flex flex-col max-w-[200px] text-left">
                   <span className="text-xs font-semibold text-white truncate">{selectedFile.name}</span>
-                  <span className="text-[10px] text-zinc-500 mt-0.5 font-medium">{(selectedFile.size / 1024).toFixed(1)} KB</span>
+                  <span className="text-[10px] text-zinc-500 mt-0.5 font-semibold">{(selectedFile.size / 1024).toFixed(1)} KB</span>
                 </div>
               </a>
               <button 
                 onClick={handleRemoveFile} 
-                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md hover:scale-105 transition-all"
+                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md hover:scale-110 transition-all"
                 title="Hapus file"
               >
                 <X className="w-3 h-3" />
@@ -182,10 +182,10 @@ const ChatInput = ({ onSend, isLoading, disabled }: ChatInputProps) => {
         )}
 
         {/* INPUT WRAPPER */}
-        <div className={`flex gap-2.5 items-end bg-white/[0.02] border p-2.5 rounded-2xl transition-all duration-300 ${
+        <div className={`flex gap-2.5 items-end bg-slate-900/40 backdrop-blur-xl border p-2.5 rounded-2xl transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.5)] ${
           isListening 
-            ? 'border-green-500/40 ring-1 ring-green-500/10 bg-green-500/[0.01]' 
-            : 'border-white/10 focus-within:border-cyan-500/30 focus-within:ring-1 focus-within:ring-cyan-500/20 focus-within:bg-white/[0.04]'
+            ? 'border-emerald-500/45 ring-1 ring-emerald-500/20 bg-emerald-500/[0.02] shadow-[0_10px_35px_rgba(16,185,129,0.05)]' 
+            : 'border-white/5 focus-within:border-cyan-500/35 focus-within:ring-1 focus-within:ring-cyan-500/15 focus-within:bg-slate-900/60 focus-within:shadow-[0_10px_35px_rgba(6,182,212,0.06)]'
         }`}>
           <input 
             type="file" 
@@ -198,7 +198,7 @@ const ChatInput = ({ onSend, isLoading, disabled }: ChatInputProps) => {
           <Button 
             variant="ghost" 
             size="icon" 
-            className={`shrink-0 text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-xl h-10 w-10 transition-colors ${
+            className={`shrink-0 text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-xl h-10 w-10 transition-all duration-200 ${
               selectedFile ? 'text-cyan-400 bg-cyan-500/10' : ''
             }`} 
             onClick={() => fileInputRef.current?.click()} 
@@ -214,7 +214,7 @@ const ChatInput = ({ onSend, isLoading, disabled }: ChatInputProps) => {
             onChange={(e) => setMessage(e.target.value)} 
             onKeyDown={handleKeyDown} 
             placeholder={isListening ? "Mendengarkan ucapan Anda... silakan bicara" : "Tulis pesan ke Nega..."} 
-            className="flex-1 min-h-[40px] max-h-[140px] bg-transparent border-0 focus-visible:ring-0 text-white resize-none py-2 px-1 placeholder:text-zinc-600 leading-relaxed text-sm" 
+            className="flex-1 min-h-[40px] max-h-[140px] bg-transparent border-0 focus-visible:ring-0 text-white resize-none py-2 px-1 placeholder:text-zinc-600 leading-relaxed text-sm scrollbar-thin" 
             disabled={disabled || isLoading} 
             rows={1} 
           />
@@ -226,8 +226,8 @@ const ChatInput = ({ onSend, isLoading, disabled }: ChatInputProps) => {
               disabled={disabled} 
               className={`shrink-0 h-10 w-10 rounded-xl transition-all duration-300 ${
                 isListening 
-                  ? 'bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20' 
-                  : 'bg-zinc-900/60 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-white/5'
+                  ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' 
+                  : 'bg-slate-950/60 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-white/5'
               }`} 
               size="icon"
               title={isListening ? "Berhenti mendengarkan" : "Dikte Suara (Voice Typing)"}
@@ -241,7 +241,7 @@ const ChatInput = ({ onSend, isLoading, disabled }: ChatInputProps) => {
             <Button 
               onClick={handleSend} 
               disabled={disabled || isLoading} 
-              className="shrink-0 h-10 w-10 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black shadow-lg shadow-cyan-500/20 active:scale-95 transition-all duration-200" 
+              className="shrink-0 h-10 w-10 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:opacity-90 text-white shadow-lg shadow-cyan-500/10 active:scale-95 transition-all duration-200 border border-cyan-400/20" 
               size="icon"
               title="Kirim pesan"
             >
@@ -257,7 +257,7 @@ const ChatInput = ({ onSend, isLoading, disabled }: ChatInputProps) => {
             <span>Nega AI Asisten</span>
           </div>
           {isListening && (
-            <p className="text-[10px] text-green-500 animate-pulse font-bold tracking-wider uppercase">
+            <p className="text-[10px] text-emerald-500 animate-pulse font-bold tracking-wider uppercase">
               ● Sedang Mendengarkan
             </p>
           )}

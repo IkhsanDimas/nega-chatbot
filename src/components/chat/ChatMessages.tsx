@@ -102,17 +102,17 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
           href={msg.file_url} 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="flex items-center gap-3.5 p-3 rounded-xl bg-black/40 border border-white/10 hover:bg-cyan-950/30 hover:border-cyan-500/30 transition-all cursor-pointer group max-w-[320px] text-decoration-none"
+          className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-950/40 border border-white/5 hover:bg-slate-900/40 hover:border-cyan-500/30 transition-all duration-300 cursor-pointer group max-w-[320px] text-decoration-none shadow-md"
         >
-          <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 shrink-0">
-            <FileText className="w-6 h-6" />
+          <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 shrink-0 group-hover:bg-cyan-500 group-hover:text-black transition-all duration-300">
+            <FileText className="w-5.5 h-5.5" />
           </div>
           <div className="flex-1 overflow-hidden text-left min-w-0">
-            <p className="text-sm font-semibold text-white/90 truncate group-hover:text-cyan-400 transition-colors">Buka Dokumen</p>
-            <p className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider truncate mt-0.5">{msg.file_type?.split('/')[1] || 'FILE'} • KLIK DISINI</p>
+            <p className="text-xs font-bold text-white/90 truncate group-hover:text-cyan-400 transition-colors">Buka Dokumen</p>
+            <p className="text-[9px] text-zinc-500 uppercase font-mono tracking-wider truncate mt-0.5">{msg.file_type?.split('/')[1] || 'FILE'} • KLIK DISINI</p>
           </div>
-          <Button variant="ghost" size="icon" className="text-zinc-500 group-hover:text-cyan-400 shrink-0" asChild>
-            <span><ExternalLink className="w-4 h-4" /></span>
+          <Button variant="ghost" size="icon" className="text-zinc-500 group-hover:text-cyan-400 shrink-0 rounded-lg" asChild>
+            <span><ExternalLink className="w-3.5 h-3.5" /></span>
           </Button>
         </a>
       </div>
@@ -120,7 +120,7 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
   };
 
   return (
-    <ScrollArea className="flex-1 px-4 md:px-8 py-6 h-full bg-[#030712]">
+    <ScrollArea className="flex-1 px-4 md:px-8 py-6 h-full bg-transparent scrollbar-thin">
       <div className="flex flex-col space-y-6 pb-6 max-w-4xl mx-auto">
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
@@ -133,7 +133,7 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
                 {/* AVATAR - Hanya tampilkan untuk AI */}
                 {!isUser && (
                   <Avatar className="w-8 h-8 border border-white/10 shadow-md shrink-0 ring-2 ring-white/5">
-                    <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white" title={AI_MODEL_NAME}>
+                    <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-white" title={AI_MODEL_NAME}>
                       <Bot className="w-4.5 h-4.5" />
                     </div>
                   </Avatar>
@@ -144,13 +144,13 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
                   
                   {isEditing ? (
                     /* --- MODE EDIT --- */
-                    <div className="w-full bg-[#1e293b] p-4 rounded-2xl border border-cyan-500/30 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+                    <div className="w-full bg-slate-900/80 p-4 rounded-2xl border border-cyan-500/30 shadow-xl animate-in fade-in zoom-in-95 duration-200">
                       <Textarea
                         ref={textareaRef}
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        className="min-h-[70px] bg-transparent border-0 focus-visible:ring-0 text-white text-sm resize-none p-0 leading-relaxed"
+                        className="min-h-[70px] bg-transparent border-0 focus-visible:ring-0 text-white text-sm resize-none p-0 leading-relaxed scrollbar-thin"
                       />
                       <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-white/5">
                         <Button onClick={cancelEditing} size="sm" variant="ghost" className="h-8 text-xs text-zinc-400 hover:text-white rounded-lg">
@@ -166,8 +166,8 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
                     <div className="relative group/bubble max-w-full">
                       <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-md overflow-hidden ${
                         isUser 
-                          ? 'bg-cyan-600 text-white rounded-tr-none' 
-                          : 'bg-[#1e293b] text-zinc-200 border border-white/5 rounded-tl-none'
+                          ? 'bg-gradient-to-tr from-cyan-600 to-indigo-600 text-white rounded-tr-none shadow-lg shadow-cyan-500/5 font-semibold' 
+                          : 'bg-slate-900/40 border border-white/5 text-zinc-200 rounded-tl-none backdrop-blur-xl shadow-md'
                       }`}>
                         
                         {renderAttachment(msg)}
@@ -183,7 +183,7 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
                       {isUser && !msg.file_url && (
                         <button
                           onClick={() => startEditing(msg)}
-                          className="absolute -left-7 top-1.5 p-1 text-zinc-500 hover:text-cyan-400 opacity-0 group-hover/bubble:opacity-100 transition-all duration-200 transform hover:scale-110 bg-[#030712]/80 rounded-full border border-white/5"
+                          className="absolute -left-8 top-1.5 p-1.5 text-zinc-500 hover:text-cyan-400 opacity-0 group-hover/bubble:opacity-100 transition-all duration-200 transform hover:scale-115 bg-slate-950/80 rounded-full border border-white/5"
                           title="Edit pesan"
                         >
                           <Pencil className="w-3 h-3" />
@@ -193,7 +193,7 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
                   )}
 
                   {/* Message Time stamp */}
-                  <span className="text-[10px] text-zinc-600 mt-1 select-none font-medium px-1">
+                  <span className="text-[10px] text-zinc-600 mt-1 select-none font-semibold px-1">
                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -205,9 +205,9 @@ const ChatMessages = ({ messages, isLoading, messagesEndRef, onEditMessage }: Ch
         {/* TYPING LOADER */}
         {isLoading && (
           <div className="flex justify-start w-full pl-12 animate-fade-in">
-            <div className="bg-[#1e293b] px-4 py-2.5 rounded-2xl rounded-tl-none border border-white/5 flex items-center gap-2">
+            <div className="bg-slate-900/40 border border-white/5 px-4 py-2.5 rounded-2xl rounded-tl-none backdrop-blur-xl flex items-center gap-2.5 shadow-md">
               <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
-              <span className="text-xs text-zinc-400">Nega sedang berpikir...</span>
+              <span className="text-xs text-zinc-400 font-semibold">Nega sedang berpikir...</span>
             </div>
           </div>
         )}

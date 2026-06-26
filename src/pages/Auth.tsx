@@ -58,18 +58,18 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#030712] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Glowing Ambient Orbs */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] animate-pulse-slow" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/10 rounded-full blur-[120px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/8 rounded-full blur-[140px] animate-pulse-slow" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-accent/8 rounded-full blur-[140px] animate-pulse-slow" style={{ animationDelay: '2.5s' }} />
       </div>
 
-      <div className="relative z-10 w-full max-w-[380px]">
+      <div className="relative z-10 w-full max-w-[400px] animate-fade-in">
         {/* Back Button */}
         <Button
           variant="ghost"
-          className="mb-6 text-zinc-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-200"
+          className="mb-8 text-zinc-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-300"
           onClick={() => navigate('/')}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -77,27 +77,27 @@ const Auth = () => {
         </Button>
 
         {/* Premium Auth Card Container */}
-        <div className="relative rounded-3xl border border-white/5 bg-slate-950/40 backdrop-blur-2xl p-8 shadow-2xl shadow-black/50 overflow-hidden">
+        <div className="relative rounded-3xl border border-white/5 bg-slate-950/30 backdrop-blur-3xl p-8 md:p-10 shadow-2xl shadow-black/80 overflow-hidden">
           {/* Card Top Border Glow Effect */}
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
 
           {/* Logo & Header */}
           <div className="flex flex-col items-center mb-8 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 relative group mb-4">
-              <Bot className="w-8 h-8 text-white relative z-10" />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary to-accent opacity-0 group-hover:opacity-100 transition-opacity blur duration-500" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl shadow-cyan-500/10 relative group mb-5">
+              <Bot className="w-9 h-9 text-white relative z-10 animate-bounce-subtle" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary to-accent opacity-30 group-hover:opacity-100 transition-opacity blur-md duration-500" />
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Selamat Datang di Nega</h1>
-            <p className="text-sm text-zinc-400 mt-1">AI Chatbot & Asisten Cerdas Indonesia</p>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Selamat Datang</h1>
+            <p className="text-sm text-zinc-400 mt-2 font-medium">Masuk untuk berinteraksi dengan Nega AI</p>
           </div>
 
           {/* Google Sign-in Action */}
           <div className="space-y-4">
-            <Button
+            <button
               type="button"
               onClick={handleGoogleLogin}
               disabled={isLoading}
-              className="w-full h-12 bg-white text-zinc-950 hover:bg-zinc-100 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 rounded-xl gap-3 font-semibold shadow-lg shadow-white/5"
+              className="w-full h-12 bg-white text-zinc-950 hover:bg-zinc-100 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-xl flex items-center justify-center gap-3.5 font-bold shadow-lg shadow-white/5 disabled:opacity-50 disabled:pointer-events-none"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin text-zinc-950" />
@@ -107,12 +107,12 @@ const Auth = () => {
                   Masuk dengan Google
                 </>
               )}
-            </Button>
+            </button>
           </div>
         </div>
 
-        <p className="text-center text-[10px] text-zinc-500 mt-6 tracking-wide">
-          Dengan melanjutkan, Anda menyetujui Ketentuan Layanan. Hanya untuk pengguna di Indonesia.
+        <p className="text-center text-[10px] text-zinc-600 mt-8 tracking-wide font-medium leading-relaxed">
+          Dengan melanjutkan, Anda menyetujui Ketentuan Layanan.<br />Hanya untuk pengguna di Indonesia.
         </p>
       </div>
     </div>

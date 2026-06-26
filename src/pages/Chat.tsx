@@ -357,7 +357,11 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background overflow-hidden relative">
+      {/* Ambient background glows */}
+      <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-gradient-to-bl from-cyan-500/5 to-transparent blur-[100px] pointer-events-none z-0" />
+      <div className="absolute bottom-0 left-[20%] w-[50%] h-[50%] bg-gradient-to-tr from-indigo-500/5 to-transparent blur-[120px] pointer-events-none z-0" />
+
       <ChatSidebar
         conversations={conversations}
         currentConversationId={conversationId}
@@ -368,7 +372,7 @@ const Chat = () => {
         onNavigate={(id) => navigate(`/chat/${id}`)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 relative z-10">
         <ChatHeader
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -379,7 +383,7 @@ const Chat = () => {
           conversationId={conversationId}
         />
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden relative">
           {messages.length === 0 && !isLoading ? (
             <WelcomeScreen onSuggestionClick={(msg) => handleSendMessage(msg)} />
           ) : (
