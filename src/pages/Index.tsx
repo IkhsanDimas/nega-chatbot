@@ -118,14 +118,14 @@ const Index = () => {
             Pilih Paket yang Sesuai
           </h2>
           <p className="text-muted-foreground mb-12 max-w-xl mx-auto">
-            Mulai gratis dengan 12 prompt per hari, atau upgrade ke PRO untuk akses tanpa batas.
+            Mulai gratis untuk berinteraksi langsung dengan AI Ainya tanpa batasan kuota chat.
           </p>
           
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             <PricingCard
               title="Gratis"
               price="Rp 0"
-              features={['12 prompt per 24 jam', 'Chat dengan AI Ainya', 'Akses dasar']}
+              features={['Chat AI tanpa batas', 'Chat dengan AI Ainya', 'Akses dasar']}
               isPopular={false}
             />
             <PricingCard

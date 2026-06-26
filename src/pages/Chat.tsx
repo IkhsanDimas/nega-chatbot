@@ -39,11 +39,8 @@ const Chat = () => {
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const remainingPrompts = profile?.subscription_type === 'pro' 
-    ? Infinity 
-    : Math.max(0, 12 - (profile?.daily_prompt_count || 0));
-
-  const canSendMessage = profile?.subscription_type === 'pro' || remainingPrompts > 0;
+  const remainingPrompts = Infinity;
+  const canSendMessage = true;
 
   useEffect(() => {
     if (user) {
@@ -295,13 +292,6 @@ const Chat = () => {
         file_type: fileType,
       });
 
-      if (profile?.subscription_type !== 'pro') {
-        await supabase
-          .from('profiles')
-          .update({ daily_prompt_count: (profile?.daily_prompt_count || 0) + 1 })
-          .eq('id', user?.id);
-        refreshProfile();
-      }
 
       const response = await supabase.functions.invoke('chat-with-ainya', {
         body: {

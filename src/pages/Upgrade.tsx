@@ -132,10 +132,9 @@ const Upgrade = () => {
           <div className="glass rounded-2xl p-6">
             <h3 className="text-lg font-semibold mb-4">Paket Gratis</h3>
             <ul className="space-y-3">
-              <CompareItem included={true} text="12 prompt per 24 jam" />
+              <CompareItem included={true} text="Chat AI tanpa batas" />
               <CompareItem included={true} text="Upload file dasar" />
               <CompareItem included={true} text="Riwayat chat tersimpan" />
-              <CompareItem included={false} text="Chat tanpa batas" />
               <CompareItem included={false} text="Voice chat" />
               <CompareItem included={false} text="Prioritas respon" />
             </ul>
