@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 export default function JoinGroup() {
   const { inviteCode } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [status, setStatus] = useState('Memproses undangan...');
 
   useEffect(() => {
@@ -41,8 +41,11 @@ export default function JoinGroup() {
         if (joinError) throw joinError;
 
         // 4. Kirim Notif ke Grup
+        const displayName = profile?.display_name || user.email?.split('@')[0] || 'Seseorang';
         await supabase.from('group_messages').insert({
-          group_id: group.id, user_id: user.id, content: 'telah bergabung melalui link! 🚀'
+          group_id: group.id,
+          user_id: user.id,
+          content: `${displayName} telah bergabung melalui link! 🚀`
         });
 
         toast.success(`Berhasil bergabung ke ${group.name}`);

@@ -32,7 +32,7 @@ const Groups = () => {
 
   useEffect(() => {
     if (!groupId) {
-      setLoading(false);
+      navigate('/chat');
       return;
     }
 

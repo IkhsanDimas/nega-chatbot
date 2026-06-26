@@ -134,11 +134,11 @@ const Upgrade = () => {
           <div className="relative rounded-2xl bg-slate-950/20 backdrop-blur-xl p-6 border border-white/5 shadow-md">
             <h3 className="text-lg font-bold text-white mb-5">Paket Gratis</h3>
             <ul className="space-y-3.5">
-              <CompareItem included={true} text="Chat AI tanpa batas" />
-              <CompareItem included={true} text="Upload file dasar" />
+              <CompareItem included={true} text="Chat AI Teks Standar" />
+              <CompareItem included={true} text="Upload file dasar (PDF & Gambar)" />
               <CompareItem included={true} text="Riwayat chat tersimpan" />
-              <CompareItem included={false} text="Voice chat" />
-              <CompareItem included={false} text="Prioritas respon" />
+              <CompareItem included={false} text="Voice chat dengan Ainya" />
+              <CompareItem included={false} text="Prioritas respon AI (Lebih cepat)" />
             </ul>
           </div>
 
@@ -150,12 +150,12 @@ const Upgrade = () => {
               </span>
             </div>
             <ul className="space-y-3.5">
-              <CompareItem included={true} text="Chat tanpa batas prompt" highlight />
-              <CompareItem included={true} text="Upload semua jenis file" highlight />
+              <CompareItem included={true} text="Chat AI Teks Prioritas" highlight />
+              <CompareItem included={true} text="Upload semua jenis file tanpa batasan" highlight />
               <CompareItem included={true} text="Riwayat chat tersimpan" />
               <CompareItem included={true} text="Voice chat dengan Ainya" highlight />
-              <CompareItem included={true} text="Prioritas respon" highlight />
-              <CompareItem included={true} text="Akses 90 hari" />
+              <CompareItem included={true} text="Prioritas respon AI maksimal" highlight />
+              <CompareItem included={true} text="Akses penuh 3 bulan (90 hari)" />
             </ul>
           </div>
         </div>
@@ -172,11 +172,11 @@ const Upgrade = () => {
                 </li>
                 <li className="flex gap-3">
                   <span className="w-6 h-6 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                  <span>Anda akan diarahkan ke DANA untuk pembayaran</span>
+                  <span>Selesaikan pembayaran via aplikasi DANA</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="w-6 h-6 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                  <span>Setelah pembayaran berhasil, akun akan otomatis di-upgrade ke PRO</span>
+                  <span>Kirimkan bukti transfer & email Anda ke support@nega.id untuk diaktifkan oleh admin (maks. 10 menit)</span>
                 </li>
               </ol>
             </div>

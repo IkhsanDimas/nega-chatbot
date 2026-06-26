@@ -47,8 +47,8 @@ const suggestions = [
 
 const WelcomeScreen = ({ onSuggestionClick }: WelcomeScreenProps) => {
   return (
-    <div className="h-full flex flex-col items-center justify-center px-4 md:px-8 py-12 bg-transparent select-none overflow-y-auto scrollbar-thin">
-      <div className="max-w-2xl w-full text-center">
+    <div className="h-full flex flex-col items-center justify-start px-4 md:px-8 py-12 bg-transparent select-none overflow-y-auto scrollbar-thin">
+      <div className="max-w-2xl w-full text-center my-auto py-6">
         {/* Glowing Brand Icon and Greetings */}
         <div className="mb-10 animate-fade-in-up">
           <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-cyan-500/10 group">

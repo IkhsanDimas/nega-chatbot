@@ -278,20 +278,33 @@ const GroupChat = () => {
     
     try {
       // Try to insert with reply_to
-      await supabase.from('group_messages').insert({ 
+      const { error } = await supabase.from('group_messages').insert({ 
         group_id: groupId, 
         user_id: profile.id, 
         content,
         reply_to: replyToId
       });
-    } catch (error) {
-      // Fallback: insert without reply_to if column doesn't exist
-      console.log('Fallback: inserting without reply_to');
-      await supabase.from('group_messages').insert({ 
-        group_id: groupId, 
-        user_id: profile.id, 
-        content
-      });
+      
+      if (error) {
+        console.error('Error inserting group message:', error);
+        // Jika kolom reply_to belum ada di DB (error code 42703 / column not found)
+        if (error.code === '42703' || error.message?.includes('reply_to')) {
+          console.log('Fallback: inserting without reply_to');
+          const { error: fallbackError } = await supabase.from('group_messages').insert({ 
+            group_id: groupId, 
+            user_id: profile.id, 
+            content
+          });
+          if (fallbackError) {
+            toast.error(`Gagal mengirim pesan: ${fallbackError.message}`);
+          }
+        } else {
+          toast.error(`Gagal mengirim pesan: ${error.message}`);
+        }
+      }
+    } catch (err: any) {
+      console.error('Network or unexpected error sending message:', err);
+      toast.error(`Error: ${err.message || 'Gagal mengirim pesan'}`);
     }
   };
 
@@ -371,6 +384,11 @@ const GroupChat = () => {
                      </div>
                    ) : (
                      <>
+                        {!isMe && (
+                          <span className="text-[11px] text-zinc-400 font-semibold mb-1 ml-1 select-none">
+                            {msg.profiles?.display_name || msg.profiles?.email?.split('@')[0] || 'Anggota Grup'}
+                          </span>
+                        )}
                        <div 
                          onClick={(e) => { e.stopPropagation(); isMe && setSelectedMessageId(selectedMessageId === msg.id ? null : msg.id); }}
                          className={`px-4 py-3 text-sm transition-all active:scale-95 ${

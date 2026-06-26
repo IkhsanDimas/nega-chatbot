@@ -125,14 +125,14 @@ const Index = () => {
             <PricingCard
               title="Gratis"
               price="Rp 0"
-              features={['Chat AI tanpa batas', 'Chat dengan AI Ainya', 'Akses dasar']}
+              features={['Chat AI Teks Standar', 'Upload file dasar (Gambar/PDF)', 'Akses fitur dasar']}
               isPopular={false}
             />
             <PricingCard
               title="PRO"
               price="Rp 60.000"
               period="/3 bulan"
-              features={['Prompt tanpa batas', 'Voice chat', 'Upload semua jenis file', 'Prioritas respon']}
+              features={['Prioritas respon AI maksimal', 'Voice chat dengan Ainya', 'Upload semua jenis file', 'Akses penuh 3 bulan']}
               isPopular={true}
             />
           </div>

@@ -16,10 +16,14 @@ serve(async (req) => {
     // Validasi input
     if (!messages || messages.length === 0) {
       return new Response(
-        JSON.stringify({ content: 'Tidak ada pesan yang dikirim.' }), 
+        JSON.stringify({ 
+          error: 'Tidak ada pesan yang dikirim.',
+          message: 'Tidak ada pesan yang dikirim.',
+          content: 'Tidak ada pesan yang dikirim.' 
+        }), 
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200
+          status: 400
         }
       )
     }
@@ -30,10 +34,14 @@ serve(async (req) => {
     
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ content: 'API Key tidak ditemukan. Silakan hubungi administrator.' }), 
+        JSON.stringify({ 
+          error: 'API Key tidak ditemukan. Silakan hubungi administrator.',
+          message: 'API Key tidak ditemukan. Silakan hubungi administrator.',
+          content: 'API Key tidak ditemukan. Silakan hubungi administrator.' 
+        }), 
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200
+          status: 500
         }
       )
     }
@@ -58,13 +66,16 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text()
+      const errorMsg = `Error dari Gemini API: ${response.status} ${response.statusText}. ${errorText}`
       return new Response(
         JSON.stringify({ 
-          content: `Error dari Gemini API: ${response.status} ${response.statusText}. ${errorText}` 
+          error: errorMsg,
+          message: errorMsg,
+          content: errorMsg
         }), 
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200
+          status: response.status || 500
         }
       )
     }
@@ -72,13 +83,16 @@ serve(async (req) => {
     const data = await response.json()
 
     if (data.error) {
+      const errorMsg = `LOG ERROR: ${data.error.message} (Status: ${data.error.code}).`
       return new Response(
         JSON.stringify({ 
-          content: `LOG ERROR: ${data.error.message} (Status: ${data.error.code}). Jika 401, kunci API Anda mungkin salah.` 
+          error: errorMsg,
+          message: errorMsg,
+          content: errorMsg 
         }), 
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200
+          status: 500
         }
       )
     }
@@ -95,13 +109,16 @@ serve(async (req) => {
 
   } catch (error: any) {
     console.error('Edge Function Error:', error)
+    const errorMsg = `Sistem Error: ${error.message}`
     return new Response(
       JSON.stringify({ 
-        content: `Sistem Error: ${error.message}` 
+        error: errorMsg,
+        message: errorMsg,
+        content: errorMsg 
       }), 
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
+        status: 500
       }
     )
   }
