@@ -37,9 +37,13 @@ const GroupChat = () => {
   // State Members Dialog
   const [showMembersDialog, setShowMembersDialog] = useState(false);
 
-  // State Edit Nama Grup
+  // State Edit Nama & Deskripsi Grup
   const [isEditingName, setIsEditingName] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
+  const [groupCreator, setGroupCreator] = useState<string | null>(null);
+  const [groupDescription, setGroupDescription] = useState('');
+  const [newGroupDescription, setNewGroupDescription] = useState('');
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -213,12 +217,20 @@ const GroupChat = () => {
     if (!groupId) { setLoading(false); return; }
     const fetchData = async () => {
       setLoading(true);
-      const { data: groupData } = await supabase.from('groups').select('name, invite_code').eq('id', groupId).single();
+      const { data: groupData } = await supabase
+        .from('groups')
+        .select('name, invite_code, created_by, description')
+        .eq('id', groupId)
+        .single();
+      
       if (groupData) {
         console.log('GroupChat - Fetched group data:', groupData);
         setGroupName(groupData.name);
         setInviteCode(groupData.invite_code);
         setNewGroupName(groupData.name); // Siapkan nama untuk diedit
+        setGroupCreator(groupData.created_by);
+        setGroupDescription(groupData.description || '');
+        setNewGroupDescription(groupData.description || '');
       } else {
         console.error('GroupChat - No group data found for ID:', groupId);
       }
@@ -252,7 +264,19 @@ const GroupChat = () => {
       toast.success("Nama grup diperbarui");
     }
   };
-  // ------------------------------
+
+  // --- FUNGSI UPDATE DESKRIPSI GRUP ---
+  const handleUpdateGroupDescription = async () => {
+    const { error } = await supabase.from('groups').update({ description: newGroupDescription }).eq('id', groupId);
+    
+    if (error) {
+      toast.error("Gagal mengubah deskripsi grup");
+    } else {
+      setGroupDescription(newGroupDescription);
+      setIsEditingDescription(false);
+      toast.success("Deskripsi grup diperbarui");
+    }
+  };
 
   const handleDelete = async (id: string) => { /* ...Sama... */
     const { error } = await supabase.from('group_messages').delete().eq('id', id);
@@ -319,37 +343,69 @@ const GroupChat = () => {
     setShowEmojiPicker(false);
   };
 
+  const isCreator = profile?.id === groupCreator;
+
   if (loading) return <div className="flex items-center justify-center h-screen bg-black"><Loader2 className="w-8 h-8 animate-spin text-cyan-500" /></div>;
 
   return createPortal(
     <div className="fixed inset-0 z-[99999] flex flex-col bg-[#020617] w-screen h-screen">
       {/* HEADER */}
       <div className="flex-none px-4 py-3 border-b border-white/10 bg-[#020617] flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-1">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           <Button onClick={() => navigate('/chat')} variant="ghost" size="icon" className="text-yellow-500 hover:bg-white/10 shrink-0">
             <ArrowLeft className="w-6 h-6" />
           </Button>
+ 
+          <div className="flex flex-col min-w-0">
+            {/* AREA NAMA GRUP (BISA DIEDIT OLEH ADMIN) */}
+            {isEditingName ? (
+              <div className="flex items-center gap-2 animate-in fade-in zoom-in-95">
+                <Input 
+                  value={newGroupName} 
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  className="h-8 bg-slate-900 border-cyan-500 text-white font-bold text-sm max-w-[200px]"
+                  autoFocus
+                />
+                <button onClick={handleUpdateGroupName} className="p-1 bg-green-500/20 text-green-500 rounded hover:bg-green-500 hover:text-white transition"><Check className="w-3.5 h-3.5" /></button>
+                <button onClick={() => { setIsEditingName(false); setNewGroupName(groupName); }} className="p-1 bg-red-500/20 text-red-500 rounded hover:bg-red-500 hover:text-white transition"><X className="w-3.5 h-3.5" /></button>
+              </div>
+            ) : (
+              <div 
+                className={`flex items-center gap-2 group ${isCreator ? 'cursor-pointer' : 'cursor-default'}`} 
+                onClick={() => isCreator && setIsEditingName(true)}
+              >
+                <h1 className="text-sm md:text-base font-bold text-white truncate max-w-[180px] hover:text-cyan-400 transition-colors" title={isCreator ? "Klik untuk edit nama" : undefined}>
+                  {groupName}
+                </h1>
+                {isCreator && <Pencil className="w-3 h-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />}
+              </div>
+            )}
 
-          {/* AREA NAMA GRUP (BISA DIEDIT) */}
-          {isEditingName ? (
-            <div className="flex items-center gap-2 flex-1 max-w-xs animate-in fade-in zoom-in-95">
-              <Input 
-                value={newGroupName} 
-                onChange={(e) => setNewGroupName(e.target.value)}
-                className="h-8 bg-slate-900 border-cyan-500 text-white font-bold"
-                autoFocus
-              />
-              <button onClick={handleUpdateGroupName} className="p-1.5 bg-green-500/20 text-green-500 rounded hover:bg-green-500 hover:text-white transition"><Check className="w-4 h-4" /></button>
-              <button onClick={() => { setIsEditingName(false); setNewGroupName(groupName); }} className="p-1.5 bg-red-500/20 text-red-500 rounded hover:bg-red-500 hover:text-white transition"><X className="w-4 h-4" /></button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setIsEditingName(true)}>
-              <h1 className="text-lg font-bold text-white truncate max-w-[200px] hover:text-cyan-400 transition-colors" title="Klik untuk edit nama">
-                {groupName}
-              </h1>
-              <Pencil className="w-3.5 h-3.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          )}
+            {/* AREA DESKRIPSI GRUP (BISA DIEDIT OLEH ADMIN) */}
+            {isEditingDescription ? (
+              <div className="flex items-center gap-2 mt-1.5 animate-in fade-in zoom-in-95">
+                <Input 
+                  value={newGroupDescription} 
+                  onChange={(e) => setNewGroupDescription(e.target.value)}
+                  placeholder="Tambah deskripsi grup..."
+                  className="h-6 bg-slate-900 border-cyan-500 text-xs text-white max-w-[240px] px-2"
+                  autoFocus
+                />
+                <button onClick={handleUpdateGroupDescription} className="p-1 bg-green-500/20 text-green-500 rounded hover:bg-green-500 hover:text-white transition"><Check className="w-3 h-3" /></button>
+                <button onClick={() => { setIsEditingDescription(false); setNewGroupDescription(groupDescription); }} className="p-1 bg-red-500/20 text-red-500 rounded hover:bg-red-500 hover:text-white transition"><X className="w-3 h-3" /></button>
+              </div>
+            ) : (
+              <div 
+                className={`flex items-center gap-1.5 mt-0.5 group ${isCreator ? 'cursor-pointer' : 'cursor-default'}`}
+                onClick={() => isCreator && setIsEditingDescription(true)}
+              >
+                <p className="text-[10px] text-zinc-500 font-medium truncate max-w-[200px]" title={isCreator ? "Klik untuk edit deskripsi" : undefined}>
+                  {groupDescription || (isCreator ? 'Klik untuk tambah deskripsi...' : 'Tidak ada deskripsi')}
+                </p>
+                {isCreator && <Pencil className="w-2.5 h-2.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />}
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Tombol Members dan Share di Kanan */}
