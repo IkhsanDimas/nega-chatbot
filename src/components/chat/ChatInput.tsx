@@ -208,13 +208,13 @@ const ChatInput = ({ onSend, isLoading, disabled }: ChatInputProps) => {
             <Paperclip className="w-5 h-5" />
           </Button>
 
-          <Textarea 
+          <textarea 
             ref={textareaRef} 
             value={message} 
             onChange={(e) => setMessage(e.target.value)} 
             onKeyDown={handleKeyDown} 
             placeholder={isListening ? "Mendengarkan ucapan Anda... silakan bicara" : "Tulis pesan ke Nega..."} 
-            className="flex-1 min-h-[40px] max-h-[140px] bg-transparent border-0 focus-visible:ring-0 text-white resize-none py-2 px-1 placeholder:text-zinc-600 leading-relaxed text-sm scrollbar-thin" 
+            className="flex-1 min-h-[40px] max-h-[140px] bg-transparent border-0 outline-none focus:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 text-white resize-none py-2 px-1 placeholder:text-zinc-600 leading-relaxed text-sm scrollbar-thin" 
             disabled={disabled || isLoading} 
             rows={1} 
           />

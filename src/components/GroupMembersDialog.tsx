@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { X, Users, Crown, UserMinus, UserPlus } from 'lucide-react';
+import { X, Users, Crown, UserMinus, UserPlus, Trash2, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -30,9 +31,48 @@ const GroupMembersDialog: React.FC<GroupMembersDialogProps> = ({
   onClose 
 }) => {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);
   const [groupCreator, setGroupCreator] = useState<string | null>(null);
+
+  const handleDeleteGroup = async () => {
+    if (!groupId || !profile) return;
+    if (!window.confirm("Apakah Anda yakin ingin menghapus grup ini? Semua data obrolan dan anggota akan hilang secara permanen.")) {
+      return;
+    }
+    try {
+      const { error } = await supabase.from('groups').delete().eq('id', groupId);
+      if (error) throw error;
+      toast.success("Grup berhasil dihapus");
+      onClose();
+      navigate('/chat');
+    } catch (err: any) {
+      console.error('Error deleting group:', err);
+      toast.error(`Gagal menghapus grup: ${err.message}`);
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    if (!groupId || !profile) return;
+    if (!window.confirm("Apakah Anda yakin ingin keluar dari grup ini?")) {
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from('group_members')
+        .delete()
+        .eq('group_id', groupId)
+        .eq('user_id', profile.id);
+      if (error) throw error;
+      toast.success("Berhasil keluar dari grup");
+      onClose();
+      navigate('/chat');
+    } catch (err: any) {
+      console.error('Error leaving group:', err);
+      toast.error(`Gagal keluar dari grup: ${err.message}`);
+    }
+  };
 
   // Fetch group members
   const fetchMembers = async () => {
@@ -205,14 +245,38 @@ const GroupMembersDialog: React.FC<GroupMembersDialogProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-zinc-700 bg-zinc-800/30">
+        <div className="p-4 border-t border-zinc-700 bg-zinc-800/30 flex flex-col gap-3">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>Total: {members.length} member</span>
-            {profile?.id === groupCreator && (
-              <span className="flex items-center gap-1 text-yellow-400">
+            {profile?.id === groupCreator ? (
+              <span className="flex items-center gap-1 text-yellow-400 font-semibold">
                 <Crown className="w-3 h-3" />
                 Anda adalah admin
               </span>
+            ) : (
+              <span className="text-zinc-500 font-medium">Anggota Grup</span>
+            )}
+          </div>
+          
+          <div className="pt-2 border-t border-zinc-800 flex gap-2">
+            {profile?.id === groupCreator ? (
+              <Button 
+                onClick={handleDeleteGroup}
+                variant="destructive"
+                className="w-full h-9 rounded-xl text-xs font-bold gap-1.5 shadow-md shadow-red-900/10 hover:scale-[1.02] active:scale-[0.98] transition-all bg-red-600 hover:bg-red-700 text-white border border-red-500/20"
+              >
+                <Trash2 className="w-4 h-4" />
+                Hapus & Keluar Grup
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleLeaveGroup}
+                variant="destructive"
+                className="w-full h-9 rounded-xl text-xs font-bold gap-1.5 shadow-md shadow-red-900/10 hover:scale-[1.02] active:scale-[0.98] transition-all bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/20"
+              >
+                <LogOut className="w-4 h-4" />
+                Keluar Grup
+              </Button>
             )}
           </div>
         </div>
