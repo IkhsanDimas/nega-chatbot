@@ -35,6 +35,7 @@ const GroupMembersDialog: React.FC<GroupMembersDialogProps> = ({
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);
   const [groupCreator, setGroupCreator] = useState<string | null>(null);
+  const [groupDescription, setGroupDescription] = useState('');
 
   const handleLeaveGroup = async () => {
     if (!groupId || !profile) return;
@@ -63,15 +64,16 @@ const GroupMembersDialog: React.FC<GroupMembersDialogProps> = ({
     
     setLoading(true);
     try {
-      // Get group creator
+      // Get group creator and description
       const { data: groupData } = await supabase
         .from('groups')
-        .select('created_by')
+        .select('created_by, description')
         .eq('id', groupId)
         .single();
       
       if (groupData) {
         setGroupCreator(groupData.created_by);
+        setGroupDescription(groupData.description || '');
       }
 
       // Get group members with profiles
@@ -153,7 +155,13 @@ const GroupMembersDialog: React.FC<GroupMembersDialogProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="p-4 overflow-y-auto max-h-[55vh] scrollbar-thin">
+          {groupDescription && (
+            <div className="mb-4 p-3.5 bg-zinc-800/40 border border-white/5 rounded-xl shadow-inner">
+              <h4 className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-1.5 select-none">Deskripsi & Aturan Grup</h4>
+              <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-wrap break-words">{groupDescription}</p>
+            </div>
+          )}
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>

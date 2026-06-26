@@ -140,22 +140,23 @@ const ChatSidebar = ({
                       isActive ? "opacity-100" : "opacity-0"
                     )} />
 
-                    <div className="flex items-center gap-3 min-w-0 overflow-hidden pl-1">
+                    <div className="flex items-center gap-3 min-w-0 overflow-hidden pl-1 pr-6">
                       <MessageSquare className={cn("w-4 h-4 shrink-0 transition-colors", isActive ? "text-cyan-400" : "text-zinc-600 group-hover:text-zinc-400")} />
                       <span className={cn("truncate text-sm font-semibold transition-colors", isActive ? "text-cyan-200" : "text-zinc-400 group-hover:text-zinc-200")}>
                         {chat.title || 'Percakapan Baru'}
                       </span>
                     </div>
 
-                    {isActive && (
-                      <button
-                        onClick={(e) => handleDeleteClick(e, chat.id, chat.title)}
-                        className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors z-20"
-                        title="Hapus Chat"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+                    <button
+                      onClick={(e) => handleDeleteClick(e, chat.id, chat.title)}
+                      className={cn(
+                        "absolute right-2 w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all z-20",
+                        isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      )}
+                      title="Hapus Chat"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 );
               })}

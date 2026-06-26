@@ -348,13 +348,25 @@ const Chat = () => {
   };
 
   const handleDeleteConversation = async (convId: string) => {
+    const originalConversations = [...conversations];
+    
+    // Update secara optimis (instan di sidebar)
+    setConversations(prev => prev.filter(c => c.id !== convId));
+    if (convId === conversationId) navigate('/chat');
+    
     try {
-      await supabase.from('conversations').delete().eq('id', convId);
-      setConversations(prev => prev.filter(c => c.id !== convId));
-      if (convId === conversationId) navigate('/chat');
+      const { error } = await supabase.from('conversations').delete().eq('id', convId);
+      if (error) throw error;
       toast({ title: 'Berhasil', description: 'Percakapan dihapus.' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting conversation:', error);
+      toast({ 
+        title: 'Gagal menghapus percakapan', 
+        description: error.message || 'Terjadi kesalahan sistem.', 
+        variant: 'destructive' 
+      });
+      // Kembalikan ke state semula jika gagal
+      setConversations(originalConversations);
     }
   };
 

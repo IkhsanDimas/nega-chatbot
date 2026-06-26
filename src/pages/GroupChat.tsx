@@ -240,14 +240,33 @@ const GroupChat = () => {
     fetchData();
 
     const channel = supabase.channel(`room-${groupId}`).on('postgres_changes', { event: '*', schema: 'public', table: 'group_messages', filter: `group_id=eq.${groupId}` }, 
-      (payload) => {
-        if (payload.eventType === 'INSERT') setMessages((prev) => [...prev, payload.new]);
+      async (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setMessages((prev) => {
+            if (prev.some(m => m.id === payload.new.id)) return prev;
+            return [...prev, payload.new];
+          });
+
+          // Fetch sender profile asynchronously if it's sent by someone else
+          if (payload.new.user_id !== profile?.id) {
+            const { data: prof } = await supabase
+              .from('profiles')
+              .select('display_name, email')
+              .eq('id', payload.new.user_id)
+              .single();
+            if (prof) {
+              setMessages((current) => current.map(m => 
+                m.id === payload.new.id ? { ...m, profiles: prof } : m
+              ));
+            }
+          }
+        }
         else if (payload.eventType === 'UPDATE') setMessages((prev) => prev.map(m => m.id === payload.new.id ? payload.new : m));
         else if (payload.eventType === 'DELETE') setMessages((prev) => prev.filter(m => m.id !== payload.old.id));
       }
     ).subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [groupId]);
+  }, [groupId, profile]);
 
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
@@ -278,9 +297,19 @@ const GroupChat = () => {
     }
   };
 
-  const handleDelete = async (id: string) => { /* ...Sama... */
-    const { error } = await supabase.from('group_messages').delete().eq('id', id);
-    if (!error) { setMessages((prev) => prev.filter(m => m.id !== id)); toast.success("Pesan dihapus"); }
+  const handleDelete = async (id: string) => {
+    const originalMessages = [...messages];
+    setMessages((prev) => prev.filter(m => m.id !== id));
+    setSelectedMessageId(null);
+    try {
+      const { error } = await supabase.from('group_messages').delete().eq('id', id);
+      if (error) throw error;
+      toast.success("Pesan dihapus");
+    } catch (err: any) {
+      console.error('Error deleting message:', err);
+      toast.error(`Gagal menghapus pesan: ${err.message}`);
+      setMessages(originalMessages);
+    }
   };
 
   const handleUpdateMessage = async () => { /* ...Sama... */
@@ -295,14 +324,37 @@ const GroupChat = () => {
     
     const content = newMessage;
     const replyToId = replyingTo?.id || null;
+    const messageId = crypto.randomUUID();
     
     setNewMessage('');
     setReplyingTo(null); // Clear reply state
     setShowEmojiPicker(false); // Close emoji picker
     
+    const optimisticMessage = {
+      id: messageId,
+      group_id: groupId,
+      user_id: profile.id,
+      content,
+      reply_to: replyToId,
+      created_at: new Date().toISOString(),
+      profiles: {
+        display_name: profile.display_name,
+        email: profile.email
+      },
+      reply_to_message: replyingTo ? {
+        id: replyingTo.id,
+        content: replyingTo.content,
+        user_id: replyingTo.user_id,
+        profiles: replyingTo.profiles
+      } : null
+    };
+
+    setMessages(prev => [...prev, optimisticMessage]);
+    
     try {
       // Try to insert with reply_to
       const { error } = await supabase.from('group_messages').insert({ 
+        id: messageId,
         group_id: groupId, 
         user_id: profile.id, 
         content,
@@ -321,14 +373,17 @@ const GroupChat = () => {
           });
           if (fallbackError) {
             toast.error(`Gagal mengirim pesan: ${fallbackError.message}`);
+            setMessages(prev => prev.filter(m => m.id !== messageId));
           }
         } else {
           toast.error(`Gagal mengirim pesan: ${error.message}`);
+          setMessages(prev => prev.filter(m => m.id !== messageId));
         }
       }
     } catch (err: any) {
       console.error('Network or unexpected error sending message:', err);
       toast.error(`Error: ${err.message || 'Gagal mengirim pesan'}`);
+      setMessages(prev => prev.filter(m => m.id !== messageId));
     }
   };
 
@@ -399,7 +454,10 @@ const GroupChat = () => {
                 className={`flex items-center gap-1.5 mt-0.5 group ${isCreator ? 'cursor-pointer' : 'cursor-default'}`}
                 onClick={() => isCreator && setIsEditingDescription(true)}
               >
-                <p className="text-[10px] text-zinc-500 font-medium truncate max-w-[200px]" title={isCreator ? "Klik untuk edit deskripsi" : undefined}>
+                <p 
+                  className="text-[10px] text-zinc-500 font-medium truncate max-w-[240px] sm:max-w-[400px] md:max-w-[600px]" 
+                  title={groupDescription || (isCreator ? 'Klik untuk tambah deskripsi' : 'Tidak ada deskripsi')}
+                >
                   {groupDescription || (isCreator ? 'Klik untuk tambah deskripsi...' : 'Tidak ada deskripsi')}
                 </p>
                 {isCreator && <Pencil className="w-2.5 h-2.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />}
