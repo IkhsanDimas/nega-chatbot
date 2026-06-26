@@ -38,18 +38,21 @@ serve(async (req) => {
       )
     }
 
-    const userMessage = messages[messages.length - 1].content
-
     // Model gemini-2.5-flash yang memiliki quota di API key baru
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`
+
+    // Memetakan seluruh pesan agar AI memiliki memori percakapan (konteks)
+    // Gemini memerlukan role 'user' (pengguna) atau 'model' (AI)
+    const geminiContents = messages.map((m: any) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
 
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        contents: [{ 
-          parts: [{ text: userMessage }] 
-        }] 
+        contents: geminiContents
       })
     })
 
